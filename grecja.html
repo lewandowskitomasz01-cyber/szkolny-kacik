@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz – Starożytna Grecja</title>
+<style>
+:root{--blue:#1f4e79;--blue2:#2e6aa3;--sky:#e8f0f8;--gold:#c99a2e;--ok:#2e8b57;--okbg:#e6f4ec;--bad:#c0392b;--badbg:#fbeaea;--ink:#1d2733;--mute:#5b6875}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,"DejaVu Sans",sans-serif;color:var(--ink);background:#f4f1ea;min-height:100vh}
+.meander{height:14px;background:repeating-linear-gradient(90deg,var(--blue) 0 14px,transparent 14px 21px)}
+header{background:var(--blue);color:#fff;text-align:center;padding:16px 10px 12px}
+header h1{margin:0;font-family:Georgia,"DejaVu Serif",serif;letter-spacing:1.5px;font-size:26px}
+header p{margin:4px 0 0;opacity:.85;font-size:14px}
+main{max-width:780px;margin:22px auto 40px;padding:0 14px}
+.card{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:22px 24px;margin-bottom:16px}
+h2{margin:0 0 12px;color:var(--blue);font-size:20px}
+label.opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer}
+label.opt:hover{background:var(--sky)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{border:2px solid var(--blue);background:#fff;color:var(--blue);border-radius:999px;padding:7px 16px;font-size:15px;cursor:pointer;font-weight:600}
+.pill.on{background:var(--blue);color:#fff}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 22px;font-size:16px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--blue2)}
+.btn.sec{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+.btn.gold{background:var(--gold)}
+.btn:disabled{opacity:.45;cursor:default}
+.small{font-size:13px;color:var(--mute)}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--mute);margin-bottom:6px}
+.bar{height:10px;background:#dde4ec;border-radius:6px;overflow:hidden;margin-bottom:16px}
+.bar div{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));transition:width .3s}
+.tag{display:inline-block;background:var(--sky);color:var(--blue);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;margin-bottom:8px}
+.qtext{font-size:19px;font-weight:600;line-height:1.4;margin-bottom:16px}
+.choices{display:grid;gap:9px}
+.choice{text-align:left;border:2px solid #cfd8e3;background:#fff;border-radius:10px;padding:12px 14px;font-size:16px;cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
+.choice.sel{border-color:var(--blue);background:var(--sky)}
+.choice.ok{border-color:var(--ok);background:var(--okbg)}
+.choice.bad{border-color:var(--bad);background:var(--badbg)}
+.tf{display:flex;gap:12px}.tf .choice{flex:1;text-align:center;font-weight:700}
+input[type=text],textarea{width:100%;font-size:17px;padding:11px 13px;border:2px solid #cfd8e3;border-radius:10px;font-family:inherit}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue)}
+input.ok{border-color:var(--ok);background:var(--okbg)} input.bad{border-color:var(--bad);background:var(--badbg)}
+select{font-size:15px;padding:7px 8px;border:2px solid #cfd8e3;border-radius:8px;background:#fff;font-family:inherit;max-width:100%}
+select.ok{border-color:var(--ok);background:var(--okbg)} select.bad{border-color:var(--bad);background:var(--badbg)}
+.mrow{display:grid;grid-template-columns:minmax(120px,38%) 1fr;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed #e1e6ec}
+.mrow b{font-weight:600}
+.gap{line-height:2.6;font-size:17px}
+.gap select{margin:0 3px}
+.order{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.order li{display:flex;align-items:center;gap:10px;border:2px solid #cfd8e3;border-radius:10px;padding:9px 12px;background:#fff}
+.order li .num{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
+.order li .txt{flex:1}
+.order li button{border:0;background:var(--sky);color:var(--blue);border-radius:6px;width:34px;height:30px;font-size:16px;cursor:pointer}
+.order li button:disabled{opacity:.3;cursor:default}
+.order li.ok{border-color:var(--ok);background:var(--okbg)} .order li.bad{border-color:var(--bad);background:var(--badbg)}
+.fb{margin-top:16px;border-radius:10px;padding:12px 14px;font-size:15.5px;line-height:1.45}
+.fb.ok{background:var(--okbg);border-left:5px solid var(--ok)}
+.fb.bad{background:var(--badbg);border-left:5px solid var(--bad)}
+.fb.mid{background:#fff6e0;border-left:5px solid var(--gold)}
+.fb.info{background:var(--sky);border-left:5px solid var(--blue)}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
+.big{font-size:54px;font-weight:800;color:var(--blue);text-align:center;margin:4px 0}
+.grade{text-align:center;font-size:22px;font-weight:700;margin-bottom:6px}
+.rev{border-top:1px solid #e3e8ee;padding:10px 0;font-size:14.5px}
+.rev .q{font-weight:600}
+.rev .y{color:var(--bad)} .rev .c{color:var(--ok)}
+.hist{font-size:14px;color:var(--mute)}
+.hint{font-size:13px;color:var(--mute);margin-top:6px}
+.topicbox{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+@media(max-width:600px){.topicbox{grid-template-columns:1fr}.mrow{grid-template-columns:1fr}.qtext{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="meander"></div>
+<header><h1>🏛 STAROŻYTNA GRECJA</h1><p>Quiz z historii · klasa 5 · Rozdział II</p></header>
+<div class="meander"></div>
+<main id="app"></main>
+
+<script>
+// ===== BAZA PYTAŃ =====
+// Typy: C wybór, TF prawda/fałsz, S wpisz słowo, N liczba, W wiek, M łączenie, O kolejność, G luki, P otwarte (samoocena)
+const Q = [];
+let _id = 0;
+const add = o => { o.id = ++_id; Q.push(o); };
+const C  = (t,q,opts,e="") => add({t,type:"C",q,opts,e});
+const TF = (t,q,a,e="") => add({t,type:"TF",q,a,e});
+const S  = (t,q,acc,e="") => add({t,type:"S",q,acc,e});
+const N  = (t,q,a,e="") => add({t,type:"N",q,a,e});
+const W  = (t,q,a,bc,e="") => add({t,type:"W",q,a,bc,e});
+const M  = (t,q,pairs,e="") => add({t,type:"M",q,pairs,e});
+const O  = (t,q,items,e="") => add({t,type:"O",q,items,e});
+const G  = (t,text,extra,e="") => add({t,type:"G",q:"Uzupełnij tekst – wybierz właściwe wyrazy.",text,extra,e});
+const P  = (t,q,model) => add({t,type:"P",q,model});
+
+const TOPICS = {
+  1:"Demokratyczne Ateny",
+  2:"Sparta i wojny z Persami",
+  3:"Bogowie i mity",
+  4:"Kultura starożytnej Grecji",
+  5:"Imperium Aleksandra Wielkiego",
+  6:"Oś czasu i obliczenia"
+};
+
+// ---------- TEMAT 1: DEMOKRATYCZNE ATENY ----------
+C(1,"Jak starożytni Grecy nazywali swój kraj?",["Hellada","Lakonia","Persja","Macedonia"],"Grecy nazywali siebie Hellenami, a swój kraj – Helladą.");
+C(1,"Jak nazywali siebie starożytni Grecy?",["Hellenami","Persami","Fenicjanami","Rzymianami"]);
+C(1,"Jakie morze otacza Grecję z trzech stron?",["Morze Śródziemne","Morze Czarne","Morze Bałtyckie","Morze Kaspijskie"]);
+C(1,"Jakim krajem jest Grecja?",["górzystym, z małą ilością urodzajnej ziemi","nizinnym, z wielkimi rzekami","pustynnym, bez dostępu do morza","bagnistym i lesistym"]);
+C(1,"Co uprawiali starożytni Grecy?",["zboże, oliwki i winorośl","ryż, herbatę i bawełnę","ziemniaki, kukurydzę i pomidory","kawę, kakao i trzcinę cukrową"]);
+C(1,"Jakie zwierzęta hodowali Grecy na górskich pastwiskach?",["kozy i owce","wielbłądy i lamy","bawoły i słonie","renifery i jaki"]);
+C(1,"Kiedy na terenie Grecji osiedliły się pierwsze greckie plemiona?",["w II tysiącleciu p.n.e.","w I wieku n.e.","w V wieku n.e.","w X wieku n.e."]);
+C(1,"Kiedy ostatecznie ukształtowały się greckie miasta-państwa (polis)?",["w VIII wieku p.n.e.","w V wieku p.n.e.","w I wieku n.e.","w II tysiącleciu n.e."]);
+C(1,"Co stanowiło naturalne granice między greckimi polis?",["góry","rzeki","mury obronne","pustynie"]);
+C(1,"Co utrudniało wrogom zdobycie Grecji?",["wysokie łańcuchy górskie i otaczające ją morza","wielkie rzeki i bagna","rozległe pustynie","gęste lasy"]);
+C(1,"Która polis w V wieku p.n.e. była najbogatsza w całej Helladzie?",["Ateny","Sparta","Troja","Milet"],"Ateny miały liczną flotę wojenną i handlową.");
+C(1,"Dzięki czemu Ateny stały się jednym z najpotężniejszych greckich miast-państw?",["dzięki licznej flocie wojennej i handlowej","dzięki słoniom bojowym","dzięki złotu z Egiptu","dzięki pracy helotów"]);
+C(1,"Co oznacza słowo „demokracja”?",["władzę ludu","władzę króla","władzę bogów","władzę wojska"],"Od greckich słów demos (lud) i kratos (władza).");
+C(1,"Greckie słowo „demos” oznacza:",["lud","władzę","miasto","wojnę"]);
+C(1,"Greckie słowo „kratos” oznacza:",["władzę","lud","mądrość","morze"]);
+C(1,"Gdzie w Atenach podejmowano najważniejsze decyzje dotyczące państwa?",["na zgromadzeniu ludowym","w pałacu króla","w świątyni Zeusa","na igrzyskach w Olimpii"]);
+C(1,"Jak zapadała decyzja na zgromadzeniu ludowym w Atenach?",["większością głosów","decyzją króla","przez losowanie","decyzją kapłanów"],"Przyjęcie wniosku musiała poprzeć przeważająca liczba zgromadzonych.");
+C(1,"Kto wprowadzał w życie postanowienia zgromadzenia ludowego?",["urzędnicy wybierani co roku","król i jego rodzina","kapłani z Delf","Spartanie"]);
+C(1,"Kto był najwybitniejszym Ateńczykiem V wieku p.n.e., uważanym za twórcę demokracji ateńskiej?",["Perykles","Leonidas","Homer","Kserkses"]);
+C(1,"Kto miał prawo brać udział w zgromadzeniu ludowym w Atenach?",["pełnoletni mężczyźni, których rodzice byli Ateńczykami","wszyscy mieszkańcy Aten","tylko najbogatsi mieszkańcy","kobiety i mężczyźni powyżej 18 lat"]);
+C(1,"Kto w starożytnych Atenach NIE miał praw obywatelskich?",["kobiety, niewolnicy i przybysze z innych miast","pełnoletni mężczyźni z rodziców Ateńczyków","bogaci kupcy urodzeni w Atenach","urzędnicy"]);
+C(1,"Czym był akropol w greckim mieście?",["wzgórzem, które było twierdzą i miejscem kultu","placem targowym","portem dla statków","teatrem pod gołym niebem"]);
+C(1,"Czym była agora?",["centralnym placem miasta (placem targowym)","wzgórzem ze świątyniami","szkołą dla chłopców","więzieniem"]);
+C(1,"Do czego najczęściej służyły amfory?",["do przechowywania wina i oliwy z oliwek","do gotowania zupy","jako hełmy dla żołnierzy","do pisania listów"]);
+C(1,"Jak nazywa się największa grecka wyspa?",["Kreta","Rodos","Itaka","Salamina"]);
+C(1,"Która współczesna polska instytucja pełni funkcję zbliżoną do ateńskiego zgromadzenia ludowego?",["Sejm","sąd","szkoła","policja"]);
+C(1,"Z czego, poza polityką, zasłynął Perykles?",["dowodził armią, był mówcą i wspierał naukę i sztukę","wyrzeźbił posąg Zeusa","był królem Sparty","napisał „Iliadę”"]);
+C(1,"Dlaczego amfory są dziś cennym źródłem historycznym?",["przedstawiano na nich ważne wydarzenia, sceny z życia i mity","są zrobione ze złota","zapisano na nich prawa Aten","służyły jako mapy"]);
+TF(1,"Grecja to kraj z wieloma wielkimi rzekami.",false,"Grecja nie ma wielkich rzek.");
+TF(1,"Greckie terytoria obejmują ponad tysiąc wysp.",true);
+TF(1,"Starożytni Grecy stworzyli jedno wspólne państwo.",false,"Tworzyli wiele samodzielnych polis.");
+TF(1,"Każda polis miała własne władze i wojsko.",true);
+TF(1,"Mieszkańców Grecji łączyła wspólna kultura, jeden język i wiara w tych samych bogów.",true);
+TF(1,"Kobiety w starożytnych Atenach mogły głosować na zgromadzeniu ludowym.",false);
+TF(1,"Niewolnicy w Atenach nie mieli praw obywatelskich.",true);
+TF(1,"Przybysz z innego greckiego miasta, mieszkający w Atenach wiele lat, miał prawa obywatelskie.",false);
+TF(1,"Urzędników w Atenach wybierano co roku.",true);
+TF(1,"W Atenach każdy obywatel, bez względu na majątek i pochodzenie, mógł zabrać głos w sprawach państwa.",true);
+TF(1,"W starożytnych Atenach w imieniu obywateli decydowali wybrani posłowie i senatorowie.",false,"Ateńczycy głosowali osobiście – posłowie i senatorowie są we współczesnej demokracji.");
+TF(1,"We współczesnych państwach demokratycznych kobietom przysługują prawa obywatelskie.",true);
+TF(1,"Sparta była najbogatszą polis Grecji w V wieku p.n.e.",false,"Najbogatsze były Ateny.");
+TF(1,"Na zgromadzeniu ludowym dyskutowano np. o wypowiedzeniu wojny, zawarciu pokoju i nowych podatkach.",true);
+TF(1,"Polis najczęściej obejmowała miasto oraz okoliczne wsie.",true);
+S(1,"Jak nazywa się greckie miasto-państwo?",["polis"]);
+S(1,"Jak nazywał się centralny plac (plac targowy) greckiego miasta?",["agora"]);
+S(1,"Jak nazywało się wzgórze w greckim mieście, będące twierdzą i miejscem kultu?",["akropol","akropolis"]);
+S(1,"Jak nazywa się ustrój, w którym władzę sprawują wszyscy wolni obywatele?",["demokracja"]);
+S(1,"Jak nazywał się najwybitniejszy Ateńczyk V wieku p.n.e.?",["Perykles"]);
+S(1,"Jak nazywa się naczynie, w którym Grecy przechowywali wino i oliwę?",["amfora","amfory"]);
+S(1,"Jak nazywa się największa grecka wyspa?",["Kreta"]);
+S(1,"Na jakim zgromadzeniu Ateńczycy podejmowali najważniejsze decyzje?",["zgromadzenie ludowe","ludowym","zgromadzeniu ludowym"]);
+S(1,"Która polis była najbogatsza w Helladzie w V wieku p.n.e.?",["Ateny"]);
+M(1,"Połącz pojęcie z jego znaczeniem.",[["polis","miasto-państwo"],["agora","plac targowy"],["akropol","wzgórze – twierdza i miejsce kultu"],["demokracja","władza ludu"],["amfora","naczynie na wino i oliwę"]]);
+M(1,"Połącz greckie słowo z jego znaczeniem.",[["demos","lud"],["kratos","władza"],["Hellada","Grecja"],["Hellenowie","Grecy"]]);
+G(1,"W V wieku p.n.e. najbogatszą polis w Helladzie stały się [Ateny]. Panowała tam [demokracja]. Najważniejsze decyzje podejmowano na [zgromadzeniu ludowym]. Najwybitniejszym Ateńczykiem tamtych czasów był [Perykles].",["Sparta","Leonidas","w świątyni"]);
+G(1,"Grecy nazywali siebie [Hellenami], a swój kraj – [Helladą]. Tworzyli wiele samodzielnych miast-państw zwanych [polis]. Naturalne granice między nimi stanowiły [góry].",["Persami","Lakonią","rzeki"]);
+G(1,"Grecja to [górzysty] kraj, z trzech stron otoczony Morzem [Śródziemnym]. Grecy uprawiali zboże, [oliwki] i winorośl, a na pastwiskach hodowali kozy i [owce].",["nizinny","Czarnym","ryż","wielbłądy"]);
+P(1,"Podaj dwie różnice między demokracją ateńską a współczesną.","W Atenach obywatele głosowali osobiście, a dziś wybieramy przedstawicieli (posłów i senatorów). W Atenach kobiety, niewolnicy i przybysze nie mieli praw – dziś prawa mają wszyscy obywatele, nie ma niewolnictwa.");
+P(1,"Wyjaśnij, dlaczego starożytni Grecy nie stworzyli jednego państwa.","Góry i morza chroniły Grecję przed wrogami, więc plemiona nie musiały się łączyć. Góry oddzielały doliny – w nich powstawały osobne polis.");
+P(1,"Opisz warunki przyrodnicze starożytnej Grecji.","Kraj górzysty, z trzech stron otoczony Morzem Śródziemnym, ponad tysiąc wysp, mało urodzajnej ziemi, brak wielkich rzek; uprawy tylko na małych równinach i w górskich dolinach.");
+P(1,"Na czym polegały demokratyczne rządy w starożytnych Atenach?","Najważniejsze decyzje podejmowali obywatele na zgromadzeniu ludowym, głosując – decydowała większość głosów. Urzędnicy wybierani co roku wprowadzali decyzje w życie.");
+P(1,"Wyjaśnij, czym była grecka polis.","Samodzielne miasto-państwo: miasto z okolicznymi wsiami, z własnymi władzami i wojskiem.");
+
+// ---------- TEMAT 2: SPARTA I WOJNY Z PERSAMI ----------
+C(2,"W jakiej krainie leżała Sparta?",["w Lakonii","w Macedonii","w Persji","w Egipcie"]);
+C(2,"Jak nazywano podbitą ludność, którą Spartanie zamienili w niewolników?",["heloci","periojkowie","hoplici","Hellenowie"]);
+C(2,"Kim byli periojkowie?",["ludźmi wolnymi bez praw politycznych, zajmującymi się rzemiosłem i handlem","niewolnikami pracującymi na roli","pełnoprawnymi obywatelami Sparty","perskimi żołnierzami"]);
+C(2,"Jaką część plonów heloci musieli oddawać Spartanom?",["połowę","jedną dziesiątą","wszystko","nic"]);
+C(2,"Do którego roku życia Spartanie pełnili służbę wojskową?",["do 60. roku życia","do 20. roku życia","do 30. roku życia","do 40. roku życia"]);
+C(2,"Ilu królów jednocześnie sprawowało władzę w Sparcie?",["dwóch","jeden","trzech","dziesięciu"],"Jeden wyruszał na wojnę, drugi zostawał w polis.");
+C(2,"Dlaczego w Sparcie było dwóch królów?",["bo jeden wyruszał jako dowódca na wojnę, a drugi zostawał w polis","bo każdy rządził inną wyspą","bo tak nakazał perski król","bo jeden był kapłanem"]);
+C(2,"Co przypominało państwo spartańskie?",["obóz wojskowy","wielki targ","świątynię","teatr"]);
+C(2,"Kim byli hoplici?",["ciężkozbrojnymi greckimi piechurami","perskimi łucznikami","niewolnikami w Sparcie","aktorami w teatrze"]);
+C(2,"Jak nazywano okrągłą tarczę hoplity?",["hoplon","falanga","amfora","agora"]);
+C(2,"Jak nazywał się zwarty szyk greckich wojowników?",["falanga","hoplon","polis","akropol"]);
+C(2,"Co powszechnie mówiono o spartańskich wojownikach?",["że jeden Spartanin walczy lepiej niż trzech innych Greków","że boją się wody","że walczą tylko konno","że nigdy nie ćwiczą"]);
+C(2,"Dlaczego kobiety w Sparcie musiały dbać o sprawność fizyczną?",["by rodzić zdrowe i silne dzieci – przyszłych wojowników","bo walczyły w falandze","bo startowały w igrzyskach","bo były kapłankami"]);
+C(2,"Po co Spartanie utrzymywali stałą gotowość bojową?",["by zapobiec buntom podbitej ludności","by zdobyć Egipt","by wygrywać igrzyska","by chronić Ateny"]);
+C(2,"Gdzie leżało imperium perskie?",["na wschód od Grecji, w Azji i Afryce","na północ od Grecji, w Europie","na zachód od Grecji, w Italii","na wyspie Krecie"]);
+C(2,"Co to jest danina?",["obowiązkowa opłata na rzecz władcy","rodzaj tarczy","umowa między państwami","bitwa morska"]);
+C(2,"Które greckie miasto przewodziło powstaniu przeciw Persom w 499 r. p.n.e.?",["Milet","Sparta","Ateny","Troja"]);
+C(2,"Kto udzielił wsparcia zbuntowanemu Miletowi?",["Ateńczycy","Spartanie","Egipcjanie","Macedończycy"]);
+C(2,"Który król perski wysłał w 490 r. p.n.e. armię przeciwko Atenom?",["Dariusz","Kserkses","Leonidas","Filip II"]);
+C(2,"Dlaczego król Dariusz wysłał armię przeciw Atenom?",["chciał je ukarać za wsparcie buntowników z Miletu","chciał zdobyć Olimp","bo Ateny nie przysłały zawodników na igrzyska","bo chciał uwolnić helotów"]);
+C(2,"Kto zwyciężył w bitwie pod Maratonem w 490 r. p.n.e.?",["Ateńczycy","Persowie","Macedończycy","Egipcjanie"]);
+C(2,"Który król perski w 480 r. p.n.e. osobiście poprowadził armię i flotę przeciw Grecji?",["Kserkses","Dariusz","Perykles","Aleksander"]);
+C(2,"Czym były Termopile?",["wąskim przesmykiem między morzem a górami","wyspą na Morzu Egejskim","świątynią Zeusa","stolicą Persji"]);
+C(2,"Dlaczego w Termopilach Grecy długo skutecznie odpierali ataki Persów?",["bo w wąskim przesmyku Persowie nie mogli wykorzystać przewagi liczebnej","bo Persowie nie mieli broni","bo padał śnieg","bo pomagali im Egipcjanie"]);
+C(2,"Jak Persowie zdołali obejść Greków pod Termopilami?",["w wyniku zdrady poznali ścieżkę przez góry","przepłynęli rzekę","przekopali tunel","przekupili króla Leonidasa"]);
+C(2,"Ilu Spartan pozostało w Termopilach z królem Leonidasem?",["300","3000","30","30 000"]);
+C(2,"Który wódz ateński postanowił stoczyć z Persami bitwę na morzu?",["Temistokles","Perykles","Leonidas","Sokrates"]);
+C(2,"Co stało się z Atenami po sforsowaniu Termopil przez Persów?",["zostały zajęte i spalone przez Persów","stały się stolicą Persji","zostały oddane Sparcie","nic się nie stało"],"Wcześniej Temistokles nakazał ludności opuścić miasto.");
+C(2,"Gdzie w 480 r. p.n.e. rozegrała się decydująca bitwa morska z Persami?",["w pobliżu wyspy Salamina","pod Maratonem","pod Termopilami","w Olimpii"]);
+C(2,"Co to jest sojusz?",["umowa między państwami zakładająca współdziałanie","obowiązkowa opłata dla władcy","rodzaj szyku bojowego","święto ku czci Dionizosa"]);
+C(2,"Co oznacza wyrażenie „lakoniczna wypowiedź”?",["bardzo krótka, zwięzła wypowiedź","długa i ozdobna przemowa","wypowiedź w obcym języku","kłamstwo"]);
+C(2,"Od czego pochodzi przymiotnik „lakoniczny”?",["od Lakonii – krainy, w której leżała Sparta","od imienia króla Leonidasa","od greckiego słowa „lud”","od nazwy tarczy"]);
+C(2,"Co oznacza wyrażenie „spartańskie warunki”?",["życie pozbawione wygód","luksusowe życie","życie na wsi","życie w wielkim mieście"]);
+C(2,"Do czego nawiązuje tradycja biegów maratońskich?",["do bitwy pod Maratonem","do bitwy pod Salaminą","do igrzysk zimowych","do wyprawy Aleksandra do Indii"]);
+C(2,"Co spotykało młodego Spartanina, który nie potrafił odpowiedzieć wystarczająco krótko?",["był karany","dostawał nagrodę","musiał napisać wiersz","zostawał królem"]);
+TF(2,"Heloci mieli pełne prawa obywatelskie.",false);
+TF(2,"Tylko spartańscy mężczyźni mogli brać udział w zgromadzeniu obywateli i kandydować do władz.",true);
+TF(2,"Młodzież spartańska była uczona zwięzłego wypowiadania się.",true);
+TF(2,"Młodzi Spartanie spali w wygodnych łóżkach i jadali obfite posiłki.",false,"Jadali skromnie, spali na posłaniu z trzciny, zimą nosili lekkie szaty.");
+TF(2,"Bitwa pod Maratonem odbyła się w 480 r. p.n.e.",false,"W 490 r. p.n.e.");
+TF(2,"Bitwy pod Termopilami i pod Salaminą rozegrały się w tym samym roku.",true,"480 r. p.n.e.");
+TF(2,"Persowie zwyciężyli w bitwie pod Salaminą.",false);
+TF(2,"Po klęsce pod Salaminą Persowie musieli zrezygnować z planów podboju Grecji.",true);
+TF(2,"Greckie miasta w Azji Mniejszej musiały płacić Persom daniny i dostarczać im wojsko oraz okręty.",true);
+TF(2,"W obliczu najazdu Kserksesa greckie miasta-państwa zawarły sojusz.",true);
+TF(2,"Pod Termopilami Spartanie Leonidasa uciekli, gdy groziło im okrążenie.",false,"Zostali i zginęli w nierównej walce – nie pozwalał im na to honor.");
+TF(2,"Pod Maratonem dziesięciotysięczne wojska ateńskie pokonały Persów.",true);
+TF(2,"Periojkowie byli niewolnikami.",false,"Byli wolni, ale nie mieli praw politycznych.");
+S(2,"Jak nazywano niewolników w Sparcie?",["heloci","helota","helotami"]);
+S(2,"Jak nazywała się kraina, w której leżała Sparta?",["Lakonia"]);
+S(2,"Jak nazywał się król Sparty, który zginął pod Termopilami?",["Leonidas"]);
+S(2,"Pod jaką miejscowością Ateńczycy pokonali Persów w 490 r. p.n.e.?",["Maraton","Maratonem"]);
+S(2,"W pobliżu jakiej wyspy Grecy pokonali flotę perską w 480 r. p.n.e.?",["Salamina","Salaminą","Salaminy"]);
+S(2,"Jak nazywano ciężkozbrojnych greckich piechurów?",["hoplici","hoplita"]);
+S(2,"Jak nazywał się zwarty szyk bojowy hoplitów?",["falanga"]);
+S(2,"Jak nazywała się okrągła tarcza hoplity?",["hoplon"]);
+S(2,"Jak nazywał się perski król, który najechał Grecję w 480 r. p.n.e.?",["Kserkses"]);
+S(2,"Jak nazywał się perski król, który wysłał armię na Ateny w 490 r. p.n.e.?",["Dariusz"]);
+S(2,"Jak nazywał się wódz ateński, zwycięzca spod Salaminy?",["Temistokles"]);
+S(2,"Które miasto przewodziło powstaniu greckich polis przeciw Persom w 499 r. p.n.e.?",["Milet"]);
+S(2,"Jak nazywali się wolni mieszkańcy Sparty bez praw politycznych, zajmujący się rzemiosłem i handlem?",["periojkowie","periojkami","periojek"]);
+S(2,"Jak nazywał się wąski przesmyk, w którym bronili się Spartanie Leonidasa?",["Termopile","Termopilach"]);
+N(2,"Ilu Spartan zostało z królem Leonidasem w Termopilach?",300);
+N(2,"Do którego roku życia Spartanie służyli w wojsku?",60);
+M(2,"Połącz grupę mieszkańców Sparty z opisem.",[["Spartanie","pełnoprawni obywatele, wojownicy"],["heloci","niewolnicy pracujący na roli"],["periojkowie","wolni rzemieślnicy i kupcy bez praw politycznych"]]);
+M(2,"Połącz postać z wydarzeniem.",[["Dariusz","wyprawa na Ateny w 490 r. p.n.e."],["Kserkses","najazd na Grecję w 480 r. p.n.e."],["Leonidas","obrona Termopil"],["Temistokles","zwycięstwo pod Salaminą"]]);
+M(2,"Połącz pojęcie z wyjaśnieniem.",[["hoplita","ciężkozbrojny piechur"],["hoplon","okrągła tarcza"],["falanga","zwarty szyk bojowy"],["danina","obowiązkowa opłata na rzecz władcy"],["sojusz","umowa o współdziałaniu państw"]]);
+M(2,"Połącz wyrażenie z jego znaczeniem.",[["spartańskie warunki","życie bez wygód"],["lakoniczna wypowiedź","krótka, zwięzła wypowiedź"],["maraton","bieg nawiązujący do bitwy z 490 r. p.n.e."]]);
+O(2,"Ułóż wydarzenia w kolejności – od najwcześniejszego.",["powstanie greckich miast w Azji Mniejszej","bitwa pod Maratonem","bitwa pod Termopilami","bitwa pod Salaminą"],"499 → 490 → 480 (najpierw Termopile, potem Salamina).");
+O(2,"Ułóż przebieg najazdu Kserksesa w kolejności.",["Kserkses wyrusza z armią i flotą","Grecy bronią przesmyku w Termopilach","Persowie zajmują i palą Ateny","bitwa morska pod Salaminą"]);
+G(2,"W 490 r. p.n.e. perski król [Dariusz] wysłał armię przeciwko Atenom. Ateńczycy zwyciężyli pod [Maratonem]. Dziesięć lat później na Grecję wyruszył [Kserkses]. W Termopilach zginął król Sparty [Leonidas], a wódz ateński [Temistokles] doprowadził do zwycięstwa pod Salaminą.",["Perykles","Filip II"]);
+G(2,"Sparta leżała w krainie zwanej [Lakonią]. Podbitą ludność zamieniono w niewolników zwanych [helotami]. Wolni rzemieślnicy i kupcy bez praw politycznych to [periojkowie]. Spartanie służyli w wojsku do [60.] roku życia.",["Macedonią","hoplitami","20."]);
+G(2,"Greckich ciężkozbrojnych piechurów nazywamy [hoplitami]. Mieli długie włócznie i okrągłe tarcze zwane [hoplonami]. W bitwie tworzyli zwarty szyk, czyli [falangę].",["helotami","amforami","agorę"]);
+P(2,"Wyjaśnij, dlaczego Spartan uważano za najdzielniejszych greckich wojowników.","Całe życie Sparty było podporządkowane wojsku: surowe wychowanie od dziecka, ciągłe ćwiczenia wojskowe i gimnastyczne, służba do 60. roku życia, stała gotowość bojowa.");
+P(2,"Przedstaw przyczyny bitwy pod Maratonem.","Ateńczycy wsparli powstanie greckich miast w Azji Mniejszej (Miletu) przeciw Persom. Król Dariusz chciał ukarać Ateny i wysłał przeciw nim armię.");
+P(2,"Opisz krótko przebieg najazdu Persów na Grecję w 480 r. p.n.e.","Kserkses ruszył z armią i flotą; Grecy zawarli sojusz i bronili przesmyku w Termopilach; po zdradzie Persowie obeszli Greków, 300 Spartan z Leonidasem zginęło; Persowie spalili Ateny; Temistokles pokonał flotę perską pod Salaminą i Persowie zrezygnowali z podboju.");
+P(2,"W jaki sposób Spartanie utrzymywali stałą gotowość bojową?","Każdy był przydzielony do oddziału, gdzie spędzał większość czasu na ćwiczeniach wojskowych, gimnastycznych i na wspólnych posiłkach.");
+P(2,"Podaj jedną zaletę i jedną wadę wychowania w Sparcie.","Zaleta: np. wytrzymałość, sprawność, odwaga, dyscyplina. Wada: np. brak wygód, okrucieństwo (chłosta), całe życie podporządkowane wojsku, mało miejsca na naukę i sztukę.");
+
+// ---------- TEMAT 3: BOGOWIE I MITY ----------
+C(3,"Wiara w wielu bogów to:",["politeizm","demokracja","filozofia","hellenizacja"]);
+C(3,"Gdzie według Greków mieszkali najważniejsi bogowie?",["na szczycie Olimpu","na Akropolu","w Delfach","na Krecie"]);
+C(3,"Czym jest Olimp?",["najwyższą górą Grecji","największą wyspą Grecji","świątynią w Atenach","rzeką w Persji"]);
+C(3,"Jaką wysokość ma Olimp?",["2917 m n.p.m.","917 m n.p.m.","8848 m n.p.m.","1913 m n.p.m."]);
+C(3,"Co zapewniało bogom nieśmiertelność?",["ambrozja i nektar","oliwa i wino","miód i mleko","złoto i srebro"],"Ambrozja – cudowny pokarm, nektar – napój.");
+C(3,"Kiedy nastąpiło pierwsze potwierdzone wejście na szczyt Olimpu?",["w 1913 roku","w 776 r. p.n.e.","w 1896 roku","w 333 r. p.n.e."]);
+C(3,"Dlaczego starożytni Grecy nie zbliżali się do szczytu Olimpu?",["wierzyli, że bogowie strącą śmiałka w przepaść","bo był tam wulkan","bo zabraniał tego król Sparty","bo nie umieli się wspinać"]);
+C(3,"Jak nazywano bóstwo opiekuńcze wybrane przez mieszkańców danego miasta?",["patron","heros","helota","hoplita"]);
+C(3,"Kto był najważniejszym bogiem Greków, władcą bogów i ludzi?",["Zeus","Posejdon","Hades","Apollo"]);
+C(3,"Jaki był główny atrybut Zeusa?",["piorun","trójząb","lira","młot"]);
+C(3,"Która bogini była żoną Zeusa i opiekowała się małżeństwami?",["Hera","Atena","Afrodyta","Penelopa"]);
+C(3,"Jakie były znaki rozpoznawcze Hery?",["owoc granatu i paw","gołąb i jabłko","tarcza i włócznia","lira i wieniec"]);
+C(3,"Która bogini opiekowała się uczonymi, mówcami i politykami?",["Atena","Hera","Afrodyta","Penelopa"]);
+C(3,"Atrybutami Ateny jako patronki wojny sprawiedliwej były:",["tarcza i włócznia","piorun i tron","trójząb i fale","lira i wieniec"]);
+C(3,"Który bóg był posłańcem bogów i nosił sandały ze skrzydłami?",["Hermes","Ares","Hefajstos","Apollo"]);
+C(3,"Kim opiekował się Hermes?",["kupcami i złodziejami","żeglarzami i rybakami","kowalami","zakochanymi"]);
+C(3,"Co potrafiła laska Hermesa?",["jej dotknięcie godziło skłócone osoby","zamieniała wszystko w złoto","wywoływała pioruny","otwierała bramy Troi"]);
+C(3,"Który bóg był bogiem ognia i patronem kowali?",["Hefajstos","Hermes","Ares","Zeus"]);
+C(3,"Gdzie według mitów znajdowała się kuźnia Hefajstosa?",["we wnętrzu wulkanu Etna na Sycylii","na szczycie Olimpu","pod Akropolem","na dnie morza"]);
+C(3,"Kto był władcą świata zmarłych?",["Hades","Posejdon","Ares","Hermes"]);
+C(3,"Kto strzegł wejścia do krainy zmarłych?",["trójgłowy pies Cerber","koń Bucefał","lew nemejski","sam Zeus"]);
+C(3,"Który bóg słynął z urody i opiekował się sztuką?",["Apollo","Ares","Hades","Hefajstos"]);
+C(3,"Jaki był jeden z atrybutów Apolla?",["lira","trójząb","piorun","młot"]);
+C(3,"Który bóg był bogiem wojny i męstwa żołnierskiego?",["Ares","Apollo","Hermes","Posejdon"]);
+C(3,"Która bogini była najpiękniejsza i opiekowała się zakochanymi?",["Afrodyta","Hera","Atena","Penelopa"]);
+C(3,"Atrybutami Afrodyty były:",["gołąb i jabłko","paw i granat","tarcza i włócznia","młot i kowadło"]);
+C(3,"Kto był władcą mórz i opiekunem żeglarzy i rybaków?",["Posejdon","Zeus","Hades","Hermes"]);
+C(3,"Z czym przedstawiano Posejdona?",["z trójzębem","z lirą","z piorunem","z laską"]);
+C(3,"Do którego boga Grecy zwracali się o pomoc w czasie wojny?",["do Aresa","do Afrodyty","do Hermesa","do Hefajstosa"]);
+C(3,"Jak nazywa się największa świątynia na Akropolu, poświęcona Atenie?",["Partenon","Erechtejon","Propyleje","Koloseum"]);
+C(3,"Czym były Propyleje?",["potężną bramą prowadzącą na Akropol","świątynią Zeusa","teatrem","posągiem Ateny"]);
+C(3,"W której świątyni na Akropolu oddawano cześć Atenie, ale także Posejdonowi?",["w Erechtejonie","w Partenonie","w Propylejach","w Panteonie"]);
+C(3,"Kto był autorem posągu Ateny Promachos (Walczącej) na Akropolu?",["Fidiasz","Myron","Homer","Perykles"]);
+C(3,"Czym są mity?",["opowieściami o życiu i czynach bogów i herosów","spisami praw","kronikami wojen","przepisami kulinarnymi"]);
+C(3,"Do czego służyły Grekom mity?",["wyjaśniały pochodzenie świata i zjawiska przyrody oraz uczyły postępowania","służyły do liczenia lat","były instrukcjami budowy świątyń","były tekstami praw"]);
+C(3,"Kim byli herosi?",["półbogami – jedno z rodziców było bogiem, drugie człowiekiem","najważniejszymi bogami","królami Persji","niewolnikami w Sparcie"]);
+C(3,"Kto uchodził za najsilniejszego z herosów?",["Herakles","Odyseusz","Achilles","Perykles"]);
+C(3,"Czyim synem był Herakles?",["Zeusa","Posejdona","Hadesa","Apolla"]);
+C(3,"Ile niezwykle trudnych zadań musiał wykonać Herakles?",["12","7","3","10"]);
+C(3,"Dlaczego Herakles musiał wykonać 12 prac?",["była to kara za zbrodnię, którą popełnił","chciał zostać królem Sparty","wygrał je na igrzyskach","rozkazał mu to Odyseusz"]);
+C(3,"Co według mitu zrobił Herakles jako ośmiomiesięczne niemowlę?",["udusił gołymi rękami dwa węże","pokonał lwa","przepłynął morze","zbudował świątynię"]);
+C(3,"Kiedy spisano „Iliadę” i „Odyseję”?",["w VIII wieku p.n.e.","w V wieku p.n.e.","w I wieku n.e.","w 1896 roku"]);
+C(3,"Jak początkowo przekazywano mity?",["ustnie – często przez wędrownych śpiewaków","w książkach drukowanych","na tablicach w świątyniach","w filmach"]);
+C(3,"O czym opowiada „Iliada”?",["o walkach podczas oblężenia Troi","o tułaczce Odyseusza","o wyprawie Aleksandra","o igrzyskach w Olimpii"]);
+C(3,"O czym opowiada „Odyseja”?",["o tułaczce Odyseusza w drodze do Itaki","o oblężeniu Troi","o bitwie pod Maratonem","o pracach Heraklesa"]);
+C(3,"Kto jest głównym bohaterem „Iliady”?",["Achilles","Odyseusz","Herakles","Leonidas"]);
+C(3,"Ile lat według Homera trwało oblężenie Troi?",["10 lat","1 rok","3 lata","100 lat"]);
+C(3,"Dzięki czyjemu sprytowi Grecy zdobyli Troję?",["Odyseusza, króla Itaki","Achillesa","Heraklesa","Peryklesa"]);
+C(3,"Gdzie leżała Troja (Ilion)?",["na terenie współczesnej Turcji","na Krecie","w Egipcie","na Peloponezie"]);
+C(3,"Jak miała na imię wierna żona Odyseusza?",["Penelopa","Hera","Afrodyta","Teano"]);
+C(3,"Która bogini pomogła Odyseuszowi wrócić do domu?",["Atena","Hera","Afrodyta","Hestia"]);
+C(3,"Który bóg był wrogi Odyseuszowi i nie chciał mu przebaczyć?",["Posejdon","Zeus","Hermes","Apollo"]);
+C(3,"Jak zachowywali się bogowie podczas wojny trojańskiej?",["każdy wspierał jedną ze stron","wszyscy pomagali Trojanom","wszyscy pomagali Grekom","nie interesowali się wojną"]);
+TF(3,"Grecy wyobrażali sobie bogów jako nieśmiertelne istoty o ludzkim wyglądzie.",true);
+TF(3,"Starożytni Grecy często wspinali się na szczyt Olimpu.",false,"Bali się – uważali, że bogowie strącą śmiałka w przepaść.");
+TF(3,"Hades był bratem Zeusa.",true);
+TF(3,"Posejdon był bratem Zeusa.",true);
+TF(3,"Atena była córką Zeusa.",true);
+TF(3,"Hefajstos wykuwał pioruny dla Zeusa.",true);
+TF(3,"Herosi, tak jak bogowie, byli nieśmiertelni.",false,"Herosi byli śmiertelni; tylko niektórzy po śmierci stawali się nieśmiertelni.");
+TF(3,"Herakles po śmierci otrzymał nieśmiertelność i zajął miejsce na Olimpie.",true);
+TF(3,"Powrót Odyseusza do Itaki trwał 10 lat.",true);
+TF(3,"Cała załoga Odyseusza szczęśliwie wróciła do domu.",false,"Zginęli wszyscy członkowie załogi.");
+TF(3,"W drewnianym koniu ukryli się najdzielniejsi greccy wojownicy.",true);
+TF(3,"Posąg Ateny Promachos był wykonany z brązu i miał około siedmiu metrów.",true);
+TF(3,"Grecy wierzyli, że od bogów zależą pokój i wojna, zdrowie i choroba.",true);
+TF(3,"Mieszkańcy każdego miasta czcili tylko swojego patrona i nie wierzyli w bogów olimpijskich.",false,"Wszyscy Grecy czcili bogów olimpijskich, a dodatkowo patrona miasta.");
+TF(3,"Trojanie sami wprowadzili drewnianego konia do miasta.",true);
+S(3,"Na jakiej górze według Greków mieszkali najważniejsi bogowie?",["Olimp","Olimpie","Olimpu"]);
+S(3,"Jak nazywał się bóg mórz?",["Posejdon"]);
+S(3,"Jak nazywał się władca świata zmarłych?",["Hades"]);
+S(3,"Jak nazywała się bogini mądrości?",["Atena"]);
+S(3,"Jak nazywała się bogini miłości?",["Afrodyta"]);
+S(3,"Jak nazywał się bóg wojny?",["Ares"]);
+S(3,"Jak nazywał się posłaniec bogów w skrzydlatych sandałach?",["Hermes"]);
+S(3,"Jak nazywał się bóg ognia i patron kowali?",["Hefajstos"]);
+S(3,"Jak nazywał się bóg opiekujący się sztuką, grający na lirze?",["Apollo"]);
+S(3,"Jak nazywała się żona Zeusa, bogini niebios?",["Hera"]);
+S(3,"Jak nazywał się najważniejszy bóg Greków?",["Zeus"]);
+S(3,"Jak nazywał się trójgłowy pies strzegący krainy zmarłych?",["Cerber"]);
+S(3,"Jak nazywał się pokarm bogów, który dawał nieśmiertelność?",["ambrozja"]);
+S(3,"Jak nazywał się napój bogów?",["nektar"]);
+S(3,"Jak nazywano półbogów?",["herosi","heros","herosami"]);
+S(3,"Jak nazywał się najsilniejszy z herosów?",["Herakles"]);
+S(3,"Komu przypisuje się autorstwo „Iliady” i „Odysei”?",["Homer","Homerowi"]);
+S(3,"Jak nazywała się wyspa, do której wracał Odyseusz?",["Itaka","Itaki","Itakę"]);
+S(3,"Jak nazywał się podstęp, dzięki któremu Grecy zdobyli Troję?",["koń trojański","drewniany koń","koń"]);
+S(3,"Jak nazywa się największa świątynia Ateny na Akropolu?",["Partenon"]);
+S(3,"Jak inaczej nazywano Troję?",["Ilion"]);
+S(3,"Jak nazywał się główny bohater „Iliady”?",["Achilles"]);
+S(3,"Jak nazywa się wiara w wielu bogów?",["politeizm"]);
+M(3,"Połącz boga z jego atrybutem.",[["Zeus","piorun"],["Posejdon","trójząb"],["Apollo","lira"],["Hefajstos","młot i kowadło"],["Hera","paw i owoc granatu"],["Afrodyta","gołąb i jabłko"]]);
+M(3,"Połącz boga z tym, czym się opiekował.",[["Atena","mądrość, uczeni i politycy"],["Hermes","kupcy i złodzieje"],["Posejdon","żeglarze i rybacy"],["Afrodyta","zakochani"],["Hera","małżeństwa"],["Ares","wojna i męstwo żołnierskie"]]);
+M(3,"Połącz budowlę lub posąg na Akropolu z opisem.",[["Partenon","największa świątynia Ateny"],["Erechtejon","świątynia Ateny i Posejdona"],["Propyleje","brama prowadząca na Akropol"],["Atena Promachos","brązowy posąg Fidiasza"]]);
+M(3,"Połącz postać z mitów z opisem.",[["Achilles","główny bohater „Iliady”"],["Odyseusz","król Itaki, wymyślił konia trojańskiego"],["Penelopa","wierna żona Odyseusza"],["Herakles","syn Zeusa, wykonał 12 prac"],["Homer","autor „Iliady” i „Odysei”"]]);
+M(3,"Połącz boga z opisem.",[["Hades","władca świata zmarłych, brat Zeusa"],["Hefajstos","bóg ognia, kuźnia w Etnie"],["Hermes","posłaniec bogów"],["Apollo","bóg słynący z urody, opiekun sztuki"]]);
+G(3,"Według wierzeń Greków najważniejsi bogowie mieszkali na szczycie [Olimpu]. Nieśmiertelność zapewniały im pokarm zwany [ambrozją] i napój zwany [nektarem]. Władcą bogów był [Zeus], a krainą zmarłych rządził [Hades].",["Akropolu","oliwą","Posejdon"]);
+G(3,"„Iliada” opowiada o oblężeniu [Troi], a jej głównym bohaterem jest [Achilles]. Miasto zdobyto dzięki sprytowi [Odyseusza], który kazał zbudować drewnianego konia. „Odyseja” opisuje jego powrót na wyspę [Itakę], gdzie czekała [Penelopa].",["Sparty","Heraklesa","Kretę","Hera"]);
+G(3,"Półbogów nazywano [herosami]. Najsilniejszym z nich był [Herakles], syn [Zeusa]. Musiał wykonać [12] niezwykle trudnych zadań.",["hoplitami","Achilles","Posejdona","7"]);
+P(3,"Wyjaśnij, jakie znaczenie dla starożytnych Greków miały mity.","Mity wyjaśniały pochodzenie świata i człowieka oraz zjawiska przyrody, a także uczyły, jak należy postępować.");
+P(3,"Opowiedz krótko, w jaki sposób Grecy zdobyli Troję.","Odyseusz kazał zbudować drewnianego konia, w którym ukryli się wojownicy. Reszta udała, że odpływa. Trojanie wprowadzili konia do miasta, w nocy wojownicy wyszli i otworzyli bramy – wojsko greckie zniszczyło Troję.");
+P(3,"Dlaczego współcześni twórcy filmowi często sięgają po greckie mity?","Bo mityczni bohaterowie i ich przygody wciąż fascynują; dzięki efektom komputerowym można pokazać fantastyczne stwory i wielkie bitwy.");
+P(3,"Kim byli herosi? Podaj przykład.","Półbogowie – jedno z rodziców było bogiem, drugie człowiekiem; mieli niezwykłą urodę i siłę, ale byli śmiertelni. Np. Herakles, Achilles.");
+P(3,"Jakie obiekty wznieśli Ateńczycy na Akropolu dla uczczenia opiekunki miasta?","Partenon (największa świątynia Ateny), Erechtejon, posąg Ateny Promachos, a do tego bramę Propyleje.");
+
+// ---------- TEMAT 4: KULTURA ----------
+C(4,"Które dziedziny sztuki świetnie rozwinęły się w starożytnej Grecji?",["malarstwo i rzeźba","fotografia i film","komiks i animacja","muzyka elektroniczna"]);
+C(4,"Dzięki czemu poznajemy głównie greckie malarstwo?",["dzięki dekorowanym wazom i amforom","dzięki obrazom olejnym","dzięki fotografiom","dzięki gobelinom"]);
+C(4,"Skąd Grecy czerpali motywy do malowania waz?",["z mitów, życia codziennego oraz świata roślin i zwierząt","tylko z wojen z Persami","z książek egipskich","z życia rzymskich cesarzy"]);
+C(4,"Od kiedy Grecy zaczęli tworzyć rzeźby przedstawiające ludzi w ruchu?",["od V wieku p.n.e.","od VIII wieku p.n.e.","od I wieku n.e.","od 1896 roku"]);
+C(4,"Z jakich materiałów Grecy wykonywali rzeźby?",["marmur, brąz, drewno zdobione kością słoniową i złotem","plastik i szkło","beton i stal","glina i papier"]);
+C(4,"Kto był autorem słynnej rzeźby „Dyskobol”?",["Myron","Fidiasz","Sofokles","Sokrates"]);
+C(4,"Które dzieło Fidiasza zaliczano do siedmiu cudów świata starożytnego?",["posąg Zeusa w Olimpii","Dyskobol","Partenon","koń trojański"]);
+C(4,"Z czego wykonano posąg Zeusa w Olimpii?",["ze złota i kości słoniowej","z drewna","z brązu","z marmuru i żelaza"]);
+C(4,"Dlaczego wiele greckich rzeźb znamy tylko z kopii?",["bo oryginały nie przetrwały do naszych czasów","bo Grecy rzeźbili tylko kopie","bo oryginały są ukryte","bo rzeźby były zbyt małe"]);
+C(4,"Którzy sąsiedzi Greków jako pierwsi zaczęli stosować monety?",["Lydowie","Persowie","Egipcjanie","Spartanie"]);
+C(4,"Podczas jakiego święta narodził się teatr grecki?",["Wielkich Dionizji","igrzysk olimpijskich","święta Zeusa w Olimpii","Panatenajów"]);
+C(4,"Ku czci którego boga odbywały się Wielkie Dionizje?",["Dionizosa – boga wina","Zeusa","Posejdona","Aresa"]);
+C(4,"Kiedy narodził się teatr grecki?",["około VI wieku p.n.e.","w VIII wieku p.n.e.","w IV wieku n.e.","w 776 r. p.n.e."]);
+C(4,"Co to jest dialog?",["rozmowa dwóch osób","pieśń chóru","rodzaj tarczy","walka zapaśnicza"]);
+C(4,"Jak nazywały się przedstawienia, które poruszały ważne problemy, np. nieposłuszeństwo wobec bogów?",["tragedie","komedie","igrzyska","mity"]);
+C(4,"Jaki charakter miały komedie?",["żartobliwy – ośmieszały wady obywateli","poważny i smutny","religijny","wojskowy"]);
+C(4,"Jaką funkcję pełnił teatr grecki?",["wychowawczą – uczył właściwego postępowania","handlową","obronną","sądową"]);
+C(4,"Gdzie w Atenach początkowo odbywały się przedstawienia teatralne?",["na agorze","na Olimpie","w porcie","w Partenonie"]);
+C(4,"Jak nazywamy dziś greckie budowle teatralne z widownią w kształcie półkola?",["amfiteatry","stadiony","akropole","agory"]);
+C(4,"Kto grał w greckim teatrze role kobiece?",["mężczyźni","kobiety","dzieci","niewolnice"],"Aktorami byli wyłącznie mężczyźni.");
+C(4,"Ile utworów prezentował każdy autor w konkursie teatralnym?",["cztery: trzy tragedie i jedną komedię","jeden","dziesięć komedii","dwie tragedie"]);
+C(4,"Kto oceniał przedstawienia w konkursach teatralnych?",["dziesięciu losowo wybranych obywateli Aten","król","kapłani Zeusa","sami aktorzy"]);
+C(4,"Jaką nagrodę otrzymywali wyróżnieni twórcy w konkursie teatralnym?",["wieńce z bluszczu","złote medale","wieńce oliwne","konie"]);
+C(4,"Który z twórców pisał komedie?",["Arystofanes","Sofokles","Ajschylos","Eurypides"]);
+C(4,"Który z wymienionych NIE był twórcą tragedii?",["Arystofanes","Ajschylos","Sofokles","Eurypides"],"Arystofanes pisał komedie.");
+C(4,"Ile utworów napisał Sofokles?",["ponad sto (do dziś zachowało się siedem)","dokładnie siedem","jeden","tysiąc"]);
+C(4,"Co oznacza słowo „filozofia”?",["umiłowanie mądrości","władzę ludu","naukę o gwiazdach","miłość do sportu"]);
+C(4,"Który filozof z Aten nauczał, że nie należy dążyć do bogactwa, lecz do tego, by dobrze żyć?",["Sokrates","Platon","Arystoteles","Pitagoras"]);
+C(4,"Kto był uczniem Sokratesa i twierdził, że świat składa się z materii oraz idei?",["Platon","Arystoteles","Myron","Homer"]);
+C(4,"Kto był uczniem Platona i opisał ponad 500 gatunków zwierząt?",["Arystoteles","Sokrates","Hipokrates","Fidiasz"]);
+C(4,"Kogo uważa się za twórcę współczesnej medycyny?",["Hipokratesa","Pitagorasa","Sofoklesa","Talesa"]);
+C(4,"Którzy greccy uczeni odkryli reguły matematyczne stosowane do dziś?",["Pitagoras i Tales z Miletu","Sofokles i Eurypides","Fidiasz i Myron","Leonidas i Temistokles"]);
+C(4,"Jak Sokrates głosił swoje poglądy?",["podczas rozmów z napotkanymi obywatelami","pisząc grube księgi","w teatrze","na igrzyskach"]);
+C(4,"Według Sokratesa człowiek powinien dążyć do:",["doskonałości ciała i umysłu","jak największego bogactwa","władzy nad innymi","zwycięstw w wojnach"]);
+C(4,"Gdzie odbywały się najsłynniejsze igrzyska starożytnej Grecji?",["w Olimpii na Peloponezie","w Atenach na Akropolu","w Sparcie","w Troi"]);
+C(4,"Ku czci którego boga organizowano igrzyska w Olimpii?",["Zeusa","Dionizosa","Aresa","Hermesa"]);
+C(4,"Co ile lat odbywały się igrzyska olimpijskie?",["co cztery lata","co roku","co dziesięć lat","co dwa lata"]);
+C(4,"Co to była olimpiada w starożytności?",["okres między kolejnymi igrzyskami","nazwa stadionu","nagroda dla zwycięzcy","bieg na 192 m"]);
+C(4,"Co robili Grecy na czas igrzysk?",["przerywali wojny, by zawodnicy mogli bezpiecznie dotrzeć","zakazywali handlu","zamykali teatry","pościli"]);
+C(4,"Kto mógł brać udział w starożytnych igrzyskach?",["wyłącznie mężczyźni","wyłącznie kobiety","wszyscy mieszkańcy świata","tylko Spartanie"]);
+C(4,"Jaką nagrodę otrzymywał zwycięzca igrzysk w Olimpii?",["wieniec z gałązek drzewa oliwnego","wieniec z bluszczu","złoty medal","puchar"]);
+C(4,"Od którego wydarzenia Grecy liczyli lata?",["od pierwszych igrzysk w 776 r. p.n.e.","od bitwy pod Maratonem","od narodzin Aleksandra","od zbudowania Partenonu"]);
+C(4,"Jaką odległość mierzył bieg na jeden stadion?",["192 metry","100 metrów","42 kilometry","1 kilometr"]);
+C(4,"Jak wyglądał skok w dal w pięcioboju?",["zawodnik skakał trzy razy z ciężarkami w rękach, liczyła się łączna długość","jeden skok bez ciężarków","skakano przez płot","skakano do wody"]);
+C(4,"Kiedy zwyciężał zapaśnik?",["gdy trzykrotnie pokonał przeciwnika","gdy przebiegł stadion","gdy rzucił najdalej","gdy przeciwnik się zmęczył"]);
+C(4,"Kiedy zakazano urządzania starożytnych igrzysk?",["w IV wieku n.e.","w 776 r. p.n.e.","w 1896 roku","w V wieku p.n.e."],"Uznano je za pogański zwyczaj.");
+C(4,"Gdzie i kiedy odbyły się pierwsze nowożytne igrzyska olimpijskie?",["w Atenach w 1896 roku","w Olimpii w 776 r. p.n.e.","w Paryżu w 1924 roku","w Rzymie w 1960 roku"]);
+C(4,"Od którego roku organizuje się zimowe igrzyska olimpijskie?",["od 1924 roku","od 1896 roku","od 776 r. p.n.e.","od 2000 roku"]);
+C(4,"Gdzie zapala się ogień olimpijski?",["w ruinach świątyni w Olimpii","na szczycie Olimpu","w Partenonie","w mieście organizatora"]);
+C(4,"Jakie cechy charakteru według Greków kształtował sport?",["wytrwałość i uczciwość","lenistwo","chciwość","nieśmiałość"]);
+TF(4,"Kultura i sztuka poszczególnych polis były do siebie podobne.",true);
+TF(4,"Początkowo Grecy rzeźbili w kamieniu nieruchome postacie.",true);
+TF(4,"Posąg Zeusa w Olimpii przetrwał do naszych czasów.",false);
+TF(4,"Uroczystości ku czci Dionizosa trwały około tygodnia.",true);
+TF(4,"Pierwszego dnia Dionizji Ateńczycy brali udział w procesjach i składali ofiary.",true);
+TF(4,"W greckim teatrze występowały kobiety.",false,"Wszystkie role grali mężczyźni.");
+TF(4,"Komedie ośmieszały wady i złe uczynki obywateli, aby skłonić ich do poprawy.",true);
+TF(4,"Grecy uważali, że sport kształtuje tylko ciało, a nie charakter.",false,"Uważali, że rozwija wytrwałość i uczciwość.");
+TF(4,"Kobiety mogły oglądać starożytne igrzyska z trybun.",false,"Wstęp na trybuny mieli wyłącznie mężczyźni.");
+TF(4,"Złamanie zasad igrzysk Grecy uważali za obrazę bogów.",true);
+TF(4,"Niektórym zwycięzcom igrzysk wystawiano nawet pomniki.",true);
+TF(4,"We współczesnych igrzyskach biorą udział tylko mężczyźni.",false);
+TF(4,"Podczas otwarcia nowożytnych igrzysk defiladę rozpoczynają reprezentanci Grecji.",true);
+TF(4,"W szkole Pitagorasa uczyły się także kobiety.",true);
+TF(4,"Pięciobój olimpijski obejmował m.in. pływanie i jazdę konną.",false,"Bieg, skok w dal, rzut dyskiem, rzut oszczepem, zapasy.");
+TF(4,"Igrzyska w Olimpii odbywały się co cztery lata.",true);
+TF(4,"Sofokles po raz pierwszy zwyciężył w konkursie teatralnym w wieku 28 lat.",true);
+S(4,"Jak nazywał się bóg wina, ku czci którego odbywały się Wielkie Dionizje?",["Dionizos"]);
+S(4,"Jak nazywamy poważne przedstawienia teatralne poruszające ważne problemy?",["tragedia","tragedie"]);
+S(4,"Jak nazywamy żartobliwe przedstawienia teatralne?",["komedia","komedie"]);
+S(4,"Jak nazywamy dziś greckie budowle teatralne z widownią w kształcie półkola?",["amfiteatr","amfiteatry"]);
+S(4,"Jak nazywa się rozmowa dwóch osób?",["dialog"]);
+S(4,"Jak Grecy nazywali „umiłowanie mądrości”?",["filozofia"]);
+S(4,"Jak nazywał się najsłynniejszy grecki rzeźbiarz, autor posągów Ateny i Zeusa?",["Fidiasz"]);
+S(4,"Kto wyrzeźbił „Dyskobola”?",["Myron"]);
+S(4,"Jak nazywał się grecki lekarz uważany za twórcę medycyny?",["Hipokrates"]);
+S(4,"Jak nazywał się filozof, nauczyciel Platona?",["Sokrates"]);
+S(4,"Jak nazywał się filozof, uczeń Platona?",["Arystoteles"]);
+S(4,"Jak nazywał się twórca greckich komedii?",["Arystofanes"]);
+S(4,"W jakiej miejscowości odbywały się starożytne igrzyska olimpijskie?",["Olimpia","Olimpii"]);
+S(4,"Jak nazywał się okres między kolejnymi igrzyskami?",["olimpiada"]);
+S(4,"Z gałązek jakiego drzewa robiono wieńce dla zwycięzców igrzysk?",["oliwne","oliwnego","drzewo oliwne","oliwka","oliwki","drzewa oliwnego"]);
+S(4,"Z jakiej rośliny robiono wieńce dla zwycięzców konkursów teatralnych?",["bluszcz","bluszczu","z bluszczu"]);
+S(4,"W jakim mieście odbyły się pierwsze nowożytne igrzyska olimpijskie?",["Ateny","Atenach"]);
+S(4,"Jak nazywa się słynna rzeźba Myrona, przedstawiająca sportowca rzucającego dyskiem?",["Dyskobol"]);
+N(4,"Ile metrów mierzył bieg na jeden stadion?",192);
+N(4,"W którym roku odbyły się pierwsze nowożytne igrzyska olimpijskie?",1896);
+N(4,"Ile konkurencji obejmował pięciobój olimpijski?",5);
+N(4,"Ilu losowo wybranych obywateli oceniało przedstawienia w konkursach teatralnych?",10);
+N(4,"Co ile lat odbywały się igrzyska w Olimpii?",4);
+N(4,"W którym roku odbyły się pierwsze igrzyska olimpijskie? (wpisz samą liczbę – rok p.n.e.)",776);
+N(4,"Ile utworów Sofoklesa zachowało się do dziś?",7);
+M(4,"Połącz postać z dziedziną.",[["Myron","rzeźba („Dyskobol”)"],["Sofokles","tragedie"],["Arystofanes","komedie"],["Hipokrates","medycyna"],["Pitagoras","matematyka"],["Sokrates","filozofia"]]);
+M(4,"Połącz filozofa z opisem.",[["Sokrates","uczył, jak dobrze żyć, rozmawiając z ludźmi"],["Platon","uczeń Sokratesa – materia i idee"],["Arystoteles","uczeń Platona – opisał ponad 500 gatunków zwierząt"]]);
+M(4,"Połącz konkurencję pięcioboju z opisem.",[["bieg","dystans jednego stadionu – 192 m"],["skok w dal","trzy skoki z ciężarkami w rękach"],["rzut dyskiem","wyrzucenie krążka bez obrotu"],["rzut oszczepem","rzut z krótkiego rozbiegu"],["zapasy","trzykrotne pokonanie przeciwnika"]]);
+M(4,"Połącz pojęcie z teatru z wyjaśnieniem.",[["tragedia","poważne przedstawienie o ważnych problemach"],["komedia","żartobliwe przedstawienie"],["dialog","rozmowa dwóch osób"],["amfiteatr","budowla z widownią w kształcie półkola"],["Dionizje","święto ku czci boga wina"]]);
+G(4,"Teatr grecki narodził się podczas [Wielkich Dionizji] – świąt ku czci boga wina [Dionizosa]. Poważne przedstawienia to [tragedie], a żartobliwe – [komedie]. Aktorami byli wyłącznie [mężczyźni].",["igrzysk","Zeusa","kobiety"]);
+G(4,"Igrzyska odbywały się w [Olimpii] ku czci [Zeusa] co [cztery] lata. Okres między igrzyskami nazywano [olimpiadą]. Zwycięzcy dostawali wieńce z gałązek drzewa [oliwnego].",["Atenach","Dionizosa","dziesięć","bluszczowego"]);
+G(4,"Najsłynniejszymi rzeźbiarzami byli [Fidiasz] i Myron. Myron wyrzeźbił [Dyskobola]. Posąg [Zeusa] w Olimpii zaliczano do siedmiu cudów świata. Rzeźby wykonywano m.in. z marmuru i [brązu].",["Sokrates","Partenon","Aresa","plastiku"]);
+G(4,"Rozmyślania Greków nazywamy [filozofią], co oznacza „umiłowanie mądrości”. [Sokrates] nauczał w Atenach w V wieku p.n.e. Jego uczniem był [Platon], a uczniem Platona – [Arystoteles].",["demokracją","Homer","Myron"]);
+P(4,"Wymień dziedziny kultury, które rozwinęły się w starożytnej Grecji.","Malarstwo (wazowe), rzeźba, teatr, filozofia, nauka (matematyka, medycyna), sport.");
+P(4,"Omów różnice między starożytnymi a współczesnymi igrzyskami olimpijskimi.","Dawniej: tylko w Olimpii, tylko mężczyźni i tylko Grecy, ku czci Zeusa, nagroda – wieniec oliwny. Dziś: w różnych miastach świata, kobiety i mężczyźni z całego świata, wiele nowych dyscyplin, są też igrzyska zimowe.");
+P(4,"Wyjaśnij, czym zajmowali się greccy filozofowie. Wymień trzech z nich.","Rozmyślali nad budową świata i celem ludzkiego życia. Np. Sokrates, Platon, Arystoteles.");
+P(4,"Opisz, jak narodził się teatr grecki.","Podczas Wielkich Dionizji chóry śpiewały pieśni ku czci Dionizosa. Dołączyły do nich osoby prowadzące dialogi – pierwsi aktorzy. Przedstawienia stały się najważniejszą częścią święta (ok. VI w. p.n.e.).");
+
+// ---------- TEMAT 5: ALEKSANDER WIELKI ----------
+C(5,"Kto był królem Macedonii w IV wieku p.n.e. i podporządkował sobie greckie polis?",["Filip II","Dariusz III","Kserkses","Perykles"]);
+C(5,"Gdzie leżała Macedonia?",["na północ od Grecji","na południe od Grecji, w Afryce","na Krecie","w Persji"]);
+C(5,"Które greckie polis nie uznało władzy Filipa II i nie weszło do Związku Korynckiego?",["Sparta","Ateny","Korynt","Delfy"]);
+C(5,"Po jakiej bitwie Filip II stanął na czele Związku Korynckiego?",["po bitwie pod Cheroneą","po bitwie pod Maratonem","po bitwie pod Issos","po bitwie pod Salaminą"]);
+C(5,"Co planował Filip II?",["podbić Persję na czele zjednoczonych Greków","zdobyć Rzym","zbudować Partenon","zorganizować pierwsze igrzyska"]);
+C(5,"Jak Filip II uzasadniał wyprawę na Persję?",["chciał pomścić perskie najazdy na Grecję z V wieku p.n.e.","chciał uwolnić helotów","chciał odnaleźć Troję","chciał zdobyć Olimp"]);
+C(5,"Dlaczego Filip liczył, że ludy podbite przez Persów podniosą bunt?",["bo zmuszano je do płacenia danin i służby wojskowej","bo nie lubiły perskiej kuchni","bo chciały mieć igrzyska","bo Persowie zakazali teatru"]);
+C(5,"W ilu szeregach najczęściej ustawiano żołnierzy w falandze macedońskiej?",["w 16","w 2","w 100","w 3"]);
+C(5,"Jak walczyła falanga macedońska?",["pierwsze szeregi trzymały poziomo krótkie włócznie, a pozostałe pod kątem długie – tworząc zaporę ostrzy","walczyła wyłącznie konno","żołnierze strzelali z łuków","walczyła na słoniach"]);
+C(5,"Kto objął dowództwo po nagłej śmierci Filipa II?",["jego syn Aleksander","Dariusz III","Leonidas","Temistokles"]);
+C(5,"W którym roku armia Aleksandra wyruszyła przeciwko Persji?",["334 r. p.n.e.","490 r. p.n.e.","323 r. p.n.e.","776 r. p.n.e."]);
+C(5,"Nad jaką rzeczką Aleksander po raz pierwszy pokonał Persów?",["Granik","Indus","Nil","Tygrys"]);
+C(5,"Co Aleksander opanował po zwycięstwie nad Granikiem?",["Azję Mniejszą (obecną Turcję)","Italię","Indie","Kretę"]);
+C(5,"Kogo Aleksander pokonał pod Issos w 333 r. p.n.e.?",["króla perskiego Dariusza III","króla Sparty Leonidasa","faraona Egiptu","Kserksesa"]);
+C(5,"Jakie kraje zdobył Aleksander po bitwie pod Issos?",["Syrię, Fenicję, Palestynę i Egipt","Italię i Galię","Indie i Chiny","Spartę i Ateny"]);
+C(5,"Jak ludność krajów Wschodu (np. Egiptu) powitała Aleksandra?",["jako wyzwoliciela spod perskiej władzy","jako najeźdźcę","jako boga morza","zamknęła przed nim bramy"]);
+C(5,"Co zaproponował Aleksandrowi przerażony król perski?",["pokój i połowę swojego państwa","pojedynek","sojusz przeciw Grecji","swoją koronę"],"Aleksander odrzucił tę propozycję.");
+C(5,"Gdzie w 331 r. p.n.e. doszło do rozstrzygającej bitwy z Persami?",["pod Gaugamelą","pod Issos","nad Granikiem","pod Maratonem"]);
+C(5,"Co stało się z Dariuszem III po bitwie pod Gaugamelą?",["uciekł i wkrótce został zamordowany przez jednego ze swoich dowódców","został królem Macedonii","poddał się i dostał Egipt","zginął w bitwie morskiej"]);
+C(5,"Jak Aleksander poradził sobie z węzłem gordyjskim?",["przeciął go mieczem","rozplątał go cierpliwie przez rok","spalił go","odmówił próby"]);
+C(5,"Co głosiła przepowiednia o węźle gordyjskim?",["kto go rozplącze, zostanie władcą świata","kto go dotknie, zginie","kto go rozplącze, wygra igrzyska","kto go zobaczy, oślepnie"]);
+C(5,"Jak wojsko okrzyknęło Aleksandra?",["„królem Azji”","„królem Sparty”","„ojcem historii”","„władcą mórz”"]);
+C(5,"Do jakiej rzeki w Indiach dotarły wojska Aleksandra w 327 r. p.n.e.?",["Indus","Nil","Eufrat","Granik"]);
+C(5,"Dlaczego Aleksander zarządził odwrót z Indii?",["mieszkańcy stawiali zacięty opór, był upał i ulewy, a żołnierze byli zmęczeni","skończyło mu się złoto","przegrał wszystkie bitwy","wezwał go król Sparty"]);
+C(5,"Z czym walczyli Macedończycy w Indiach?",["z wojskami dysponującymi słoniami bojowymi","z rydwanami egipskimi","z flotą perską","z Rzymianami"]);
+C(5,"Kiedy i gdzie zmarł Aleksander Wielki?",["w 323 r. p.n.e. w Babilonie","w 333 r. p.n.e. pod Issos","w 336 r. p.n.e. w Macedonii","w 480 r. p.n.e. w Termopilach"]);
+C(5,"Co stało się z imperium Aleksandra po jego śmierci?",["zostało podzielone na kilka państw rządzonych przez greckich zdobywców","przetrwało w całości 1000 lat","przejęli je Spartanie","zostało zatopione"]);
+C(5,"Dlaczego Aleksandrowi nadano przydomek „Wielki”?",["w uznaniu jego czynów i talentu dowódczego","bo był bardzo wysoki","bo miał wielki pałac","bo wygrał igrzyska"]);
+C(5,"Jak nazywał się ulubiony koń Aleksandra?",["Bucefał","Pegaz","Cerber","Hoplon"]);
+C(5,"Co oznacza imię konia Bucefał (z greckiego Bucefalos)?",["„byczogłowy”","„szybki jak wiatr”","„biały”","„królewski”"]);
+C(5,"Jaką postawę przyjął Aleksander wobec Persów (według Plutarcha)?",["szanował ich i dostosowywał się do miejscowych obyczajów","zakazał im mówić po persku","zamienił ich w niewolników","wypędził ich z kraju"]);
+C(5,"Ilu młodych Persów kazał Aleksander uczyć języka greckiego i walki bronią macedońską?",["30 000","300","3000","300 000"]);
+C(5,"Jak nazywała się część miast zakładanych przez Greków na Wschodzie?",["Aleksandria","Macedonia","Hellada","Olimpia"]);
+C(5,"Co słynnego powstało w Aleksandrii w Egipcie?",["największa biblioteka świata starożytnego","największy stadion świata","pierwszy teatr","posąg Zeusa"]);
+C(5,"Co to jest hellenizacja?",["przyjmowanie przez inne ludy języka greckiego i greckiego stylu życia","nauka o bogach","walka w falandze","budowa amfiteatrów"]);
+C(5,"Jak nazywamy kulturę powstałą z połączenia kultury greckiej i krajów Wschodu?",["hellenistyczna","olimpijska","perska","spartańska"]);
+C(5,"Jakie osiągnięcia Babilończyków szczególnie zainteresowały Greków?",["astronomia i matematyka","budowa statków","teatr","igrzyska"]);
+C(5,"Jak zmieniła się sztuka grecka pod wpływem Wschodu?",["architektura stała się bardziej ozdobna, a rzeźby dynamiczne","przestano budować świątynie","zaczęto malować tylko na czarno","zakazano rzeźby"]);
+C(5,"Ile mniej więcej lat trwało panowanie Greków we wschodnich krajach?",["około 300 lat","około 30 lat","około 1000 lat","około 3 lat"]);
+C(5,"Co zakończyło panowanie Greków na Wschodzie?",["podbój rzymski","najazd Persów","trzęsienie ziemi","bunt helotów"]);
+C(5,"Jaka była przyczyna podboju Persji przez Aleksandra?",["odwet za perskie najazdy i chęć zbudowania imperium","chęć zorganizowania igrzysk","poszukiwanie nowej wiary","pomoc Spartanom"]);
+C(5,"Jakie były skutki podboju Persji przez Aleksandra?",["upadek imperium perskiego i rozprzestrzenianie się kultury greckiej na Wschodzie","upadek Aten","koniec igrzysk","powstanie demokracji w Persji"]);
+C(5,"Kim był Plutarch?",["greckim pisarzem z II wieku n.e.","królem Macedonii","perskim wodzem","koniem Aleksandra"]);
+C(5,"Jaki język zyskał rangę języka międzynarodowego po podbojach Aleksandra?",["grecki","perski","egipski","łacina"]);
+TF(5,"Po odparciu Persów Sparta i Ateny rywalizowały o dominację w świecie greckim.",true);
+TF(5,"Państwo perskie było mniejsze od Grecji.",false,"Zajmowało o wiele większy obszar, ale jego potęga była pozorna.");
+TF(5,"Falanga macedońska była udoskonaloną wersją szyku Ateńczyków i Spartan.",true);
+TF(5,"Filip II osobiście poprowadził wyprawę na Persję.",false,"Zmarł nagle – wyprawę poprowadził Aleksander.");
+TF(5,"Armia Aleksandra składała się z Greków i Macedończyków.",true);
+TF(5,"Aleksander przyjął propozycję pokoju od Dariusza III.",false,"Odrzucił ją.");
+TF(5,"Wyprawa Aleksandra do Indii zakończyła się podbojem całych Indii.",false,"Zarządził odwrót.");
+TF(5,"Mimo niepowodzenia w Indiach wyprawa Aleksandra do Azji była olbrzymim sukcesem.",true);
+TF(5,"Bucefał padł podczas bitwy w Indiach.",true);
+TF(5,"Aleksander nazwał jedno z założonych miast Bukefala – na cześć swojego konia.",true);
+TF(5,"Język grecki stał się językiem międzynarodowym.",true);
+TF(5,"Moment ucieczki Dariusza III pod Issos uwieczniono na mozaice.",true,"Mozaika z około 100 r. p.n.e.");
+TF(5,"W bitwie pod Issos Aleksander trzymał się z dala od walki.",false,"Rzucił się w wir walki bez hełmu.");
+TF(5,"Aleksander długo cieszył się swoim zwycięstwem i rządził imperium przez 40 lat.",false,"Zmarł nagle w 323 r. p.n.e. w Babilonie.");
+TF(5,"Grecy budowali w podbitych krajach świątynie, teatry i stadiony takie jak w Helladzie.",true);
+S(5,"Jak nazywał się ojciec Aleksandra Wielkiego?",["Filip II","Filip"]);
+S(5,"Jak nazywała się kraina na północ od Grecji, którą rządził Filip II?",["Macedonia"]);
+S(5,"Jak nazywał się perski król pokonany przez Aleksandra?",["Dariusz III","Dariusz"]);
+S(5,"Pod jaką miejscowością odbyła się bitwa w 333 r. p.n.e.?",["Issos"]);
+S(5,"Pod jaką miejscowością odbyła się rozstrzygająca bitwa w 331 r. p.n.e.?",["Gaugamela","Gaugamelą","Gaugameli"]);
+S(5,"Jak nazywała się rzeczka, nad którą Aleksander pierwszy raz pokonał Persów?",["Granik","Granikiem"]);
+S(5,"Do jakiej rzeki dotarły wojska Aleksandra w Indiach?",["Indus"]);
+S(5,"W jakim mieście zmarł Aleksander?",["Babilon","Babilonie"]);
+S(5,"Jak nazywał się ulubiony koń Aleksandra?",["Bucefał"]);
+S(5,"Jaki przydomek nadano Aleksandrowi Macedońskiemu?",["Wielki"]);
+S(5,"Jak nazywa się przyjmowanie przez inne ludy języka greckiego i greckiego stylu życia?",["hellenizacja"]);
+S(5,"Jak nazywało się najsłynniejsze miasto założone w Egipcie, z wielką biblioteką?",["Aleksandria"]);
+S(5,"Jak nazywamy kulturę powstałą z połączenia kultury greckiej i krajów Wschodu?",["hellenistyczna","kultura hellenistyczna"]);
+S(5,"Jak nazywał się sojusz greckich miast, na czele którego stanął Filip II?",["Związek Koryncki","koryncki"]);
+S(5,"Czym Aleksander przeciął węzeł gordyjski?",["mieczem","miecz"]);
+M(5,"Połącz wydarzenie z datą.",[["bitwa nad Granikiem","334 r. p.n.e."],["bitwa pod Issos","333 r. p.n.e."],["bitwa pod Gaugamelą","331 r. p.n.e."],["dotarcie do Indii","327 r. p.n.e."],["śmierć Aleksandra","323 r. p.n.e."]]);
+M(5,"Połącz pojęcie z wyjaśnieniem.",[["hellenizacja","przyjmowanie greckiego języka i stylu życia"],["kultura hellenistyczna","połączenie kultury greckiej i Wschodu"],["falanga macedońska","szyk w 16 szeregach z włóczniami"],["węzeł gordyjski","przecięty mieczem przez Aleksandra"],["Bucefał","ulubiony koń Aleksandra"]]);
+M(5,"Połącz postać z opisem.",[["Filip II","król Macedonii, ojciec Aleksandra"],["Aleksander","„król Azji”, zdobywca Persji"],["Dariusz III","król perski pokonany pod Issos i Gaugamelą"],["Plutarch","grecki pisarz z II wieku n.e."]]);
+M(5,"Połącz bitwę z jej skutkiem.",[["nad Granikiem","opanowanie Azji Mniejszej"],["pod Issos","zdobycie Syrii, Fenicji, Palestyny i Egiptu"],["pod Gaugamelą","upadek imperium perskiego"]]);
+O(5,"Ułóż wydarzenia z życia Aleksandra w kolejności.",["wyruszenie na Persję i bitwa nad Granikiem","bitwa pod Issos","bitwa pod Gaugamelą","dotarcie do Indii nad rzekę Indus","śmierć w Babilonie"],"334 → 333 → 331 → 327 → 323 p.n.e.");
+O(5,"Ułóż w kolejności.",["Filip II podporządkowuje sobie greckie polis","Filip nagle umiera","Aleksander wyrusza na Persję","upadek imperium perskiego","podział imperium Aleksandra"]);
+G(5,"W 334 r. p.n.e. Aleksander pokonał Persów nad rzeczką [Granik]. W 333 r. p.n.e. pod [Issos] rozbił armię króla [Dariusza III]. Rozstrzygająca bitwa odbyła się w 331 r. p.n.e. pod [Gaugamelą]. Aleksander zmarł w 323 r. p.n.e. w [Babilonie].",["Termopilami","Kserksesa","Atenach"]);
+G(5,"Grecy zakładali w podbitych krajach nowe miasta, często nazywane [Aleksandria]. W Egipcie powstała tam największa [biblioteka] świata starożytnego. Przyjmowanie greckiego języka i stylu życia nazywamy [hellenizacją], a kulturę powstałą z połączenia greckiej i wschodniej – [hellenistyczną].",["Macedonia","świątynia","demokracją","perską"]);
+G(5,"Królem Macedonii był [Filip II]. Planował podbić [Persję], ale nagle zmarł. Dowództwo objął jego syn [Aleksander]. Wojsko okrzyknęło go „królem [Azji]”.",["Dariusz III","Spartę","Leonidas","Europy"]);
+P(5,"Wyjaśnij, dlaczego dla Aleksandra ważne było wzajemne poznanie się Macedończyków i Persów.","Uważał, że wymiana i wyrównanie obyczajów to pewniejszy sposób panowania nad podbitymi ludami niż przemoc.");
+P(5,"Podaj przyczyny i skutki podboju Persji przez Aleksandra.","Przyczyny: odwet za perskie najazdy na Grecję, chęć zbudowania imperium. Skutki: upadek imperium perskiego, rozprzestrzenianie się kultury greckiej na Wschodzie.");
+P(5,"Co było powodem klęski armii perskiej pod Issos?","Doskonałe dowodzenie wojskami macedońskimi i odwaga Aleksandra; Dariusz III uciekł z pola bitwy, a za nim cała jego armia.");
+P(5,"Opowiedz historię węzła gordyjskiego.","W Gordionie był bardzo skomplikowanie zawiązany węzeł. Przepowiednia mówiła, że kto go rozplącze, zostanie władcą świata. Aleksander szybko przeciął go mieczem.");
+
+// ---------- TEMAT 6: OŚ CZASU I OBLICZENIA ----------
+N(6,"Ile lat minęło od pierwszych igrzysk (776 r. p.n.e.) do bitwy pod Maratonem (490 r. p.n.e.)?",286,"776 − 490 = 286");
+N(6,"Ile lat minęło od pierwszych igrzysk (776 r. p.n.e.) do bitwy pod Salaminą (480 r. p.n.e.)?",296,"776 − 480 = 296");
+N(6,"Ile lat minęło od bitwy pod Maratonem (490 r. p.n.e.) do bitwy pod Termopilami (480 r. p.n.e.)?",10,"490 − 480 = 10");
+N(6,"Ile lat minęło od powstania miast w Azji Mniejszej (499 r. p.n.e.) do bitwy pod Maratonem (490 r. p.n.e.)?",9,"499 − 490 = 9");
+N(6,"Ile lat minęło od bitwy pod Maratonem (490 r. p.n.e.) do bitwy pod Issos (333 r. p.n.e.)?",157,"490 − 333 = 157");
+N(6,"Ile lat minęło od bitwy pod Salaminą (480 r. p.n.e.) do bitwy pod Gaugamelą (331 r. p.n.e.)?",149,"480 − 331 = 149");
+N(6,"Ile lat minęło od wyruszenia Aleksandra na Persję (334 r. p.n.e.) do jego śmierci (323 r. p.n.e.)?",11,"334 − 323 = 11");
+N(6,"Ile lat minęło od wyruszenia Aleksandra na Persję (334 r. p.n.e.) do dotarcia do Indii (327 r. p.n.e.)?",7,"334 − 327 = 7");
+N(6,"Ile lat minęło od bitwy pod Issos (333 r. p.n.e.) do bitwy pod Gaugamelą (331 r. p.n.e.)?",2,"333 − 331 = 2");
+N(6,"Ile mniej więcej lat żył Filip II (ok. 382 – 336 r. p.n.e.)?",46,"382 − 336 = 46");
+N(6,"Ile mniej więcej lat żył Perykles (ok. 495 – 429 r. p.n.e.)?",66,"495 − 429 = 66");
+N(6,"Ile mniej więcej lat żył Sofokles (ok. 496 – 406 r. p.n.e.)?",90,"496 − 406 = 90");
+N(6,"Ile lat minęło od pierwszych igrzysk (776 r. p.n.e.) do śmierci Aleksandra (323 r. p.n.e.)?",453,"776 − 323 = 453");
+N(6,"Ile lat minęło od bitwy pod Termopilami (480 r. p.n.e.) do śmierci Aleksandra (323 r. p.n.e.)?",157,"480 − 323 = 157");
+N(6,"Ile lat temu (licząc do 2026 r.) odbyły się pierwsze nowożytne igrzyska (1896 r.)?",130,"2026 − 1896 = 130");
+N(6,"Ile lat dzieli pierwsze nowożytne igrzyska (1896 r.) od pierwszych igrzysk zimowych (1924 r.)?",28,"1924 − 1896 = 28");
+N(6,"Ile lat temu (licząc do 2026 r.) po raz pierwszy zdobyto szczyt Olimpu (1913 r.)?",113,"2026 − 1913 = 113");
+N(6,"Ile lat minęło od bitwy pod Gaugamelą (331 r. p.n.e.) do śmierci Aleksandra (323 r. p.n.e.)?",8,"331 − 323 = 8");
+W(6,"W którym wieku odbyły się pierwsze igrzyska olimpijskie (776 r. p.n.e.)?",8,true);
+W(6,"W którym wieku odbyła się bitwa pod Maratonem (490 r. p.n.e.)?",5,true);
+W(6,"W którym wieku zmarł Aleksander Wielki (323 r. p.n.e.)?",4,true);
+W(6,"W którym wieku wybuchło powstanie greckich miast w Azji Mniejszej (499 r. p.n.e.)?",5,true);
+W(6,"W którym wieku odbyła się bitwa pod Issos (333 r. p.n.e.)?",4,true);
+W(6,"W którym wieku odbyła się bitwa pod Salaminą (480 r. p.n.e.)?",5,true);
+W(6,"W którym wieku wojska Aleksandra dotarły do Indii (327 r. p.n.e.)?",4,true);
+W(6,"W którym wieku odbyły się pierwsze nowożytne igrzyska (1896 r.)?",19,false);
+W(6,"W którym wieku po raz pierwszy zdobyto szczyt Olimpu (1913 r.)?",20,false);
+W(6,"W którym wieku zmarł Perykles (429 r. p.n.e.)?",5,true);
+W(6,"W którym wieku urodził się Filip II (ok. 382 r. p.n.e.)?",4,true);
+C(6,"Które wydarzenie było najwcześniej?",["pierwsze igrzyska olimpijskie","bitwa pod Maratonem","bitwa pod Issos","śmierć Aleksandra Wielkiego"]);
+C(6,"Które wydarzenie było najpóźniej?",["śmierć Aleksandra Wielkiego","bitwa pod Salaminą","bitwa pod Maratonem","pierwsze igrzyska olimpijskie"]);
+C(6,"Ile lat obejmuje jeden wiek?",["100","10","1000","50"]);
+C(6,"W latach p.n.e. – im większa liczba roku, tym wydarzenie było:",["wcześniej","później","w tym samym czasie","w naszej erze"],"Np. 776 r. p.n.e. było dawniej niż 490 r. p.n.e.");
+C(6,"Który rok był wcześniej?",["490 r. p.n.e.","480 r. p.n.e.","333 r. p.n.e.","323 r. p.n.e."]);
+C(6,"Który rok był najpóźniej?",["323 r. p.n.e.","334 r. p.n.e.","331 r. p.n.e.","333 r. p.n.e."]);
+C(6,"Do której epoki należą wydarzenia z historii starożytnej Grecji?",["starożytności","średniowiecza","nowożytności","współczesności"]);
+M(6,"Połącz wydarzenie z datą.",[["pierwsze igrzyska olimpijskie","776 r. p.n.e."],["bitwa pod Maratonem","490 r. p.n.e."],["bitwy pod Termopilami i Salaminą","480 r. p.n.e."],["bitwa pod Issos","333 r. p.n.e."],["śmierć Aleksandra","323 r. p.n.e."]]);
+M(6,"Połącz wydarzenie z datą.",[["powstanie miast w Azji Mniejszej","499 r. p.n.e."],["wyruszenie Aleksandra na Persję","334 r. p.n.e."],["bitwa pod Gaugamelą","331 r. p.n.e."],["dotarcie Aleksandra do Indii","327 r. p.n.e."],["pierwsze nowożytne igrzyska","1896 r."]]);
+M(6,"Połącz wydarzenie z wiekiem.",[["ukształtowanie się greckich polis","VIII w. p.n.e."],["narodziny teatru greckiego","VI w. p.n.e."],["okres świetności demokratycznych Aten","V w. p.n.e."],["podboje Aleksandra Wielkiego","IV w. p.n.e."]]);
+O(6,"Ułóż wydarzenia od najwcześniejszego.",["pierwsze igrzyska olimpijskie (776 r. p.n.e.)","bitwa pod Maratonem (490 r. p.n.e.)","bitwa pod Salaminą (480 r. p.n.e.)","bitwa pod Issos (333 r. p.n.e.)","śmierć Aleksandra Wielkiego (323 r. p.n.e.)"]);
+O(6,"Ułóż wydarzenia od najwcześniejszego (bez dat – trudniejsze!).",["pierwsze igrzyska olimpijskie","powstanie greckich miast przeciw Persom","bitwa pod Maratonem","bitwa pod Termopilami","bitwa pod Gaugamelą","śmierć Aleksandra Wielkiego"]);
+O(6,"Ułóż od najwcześniejszego.",["spisanie „Iliady” i „Odysei” (VIII w. p.n.e.)","narodziny teatru greckiego (VI w. p.n.e.)","rozkwit demokratycznych Aten (V w. p.n.e.)","podboje Aleksandra (IV w. p.n.e.)","pierwsze nowożytne igrzyska (1896 r.)"]);
+O(6,"Ułóż od najwcześniejszego.",["bitwa pod Maratonem","bitwa pod Salaminą","bitwa nad Granikiem","bitwa pod Issos","bitwa pod Gaugamelą"]);
+
+</script>
+<script>
+// ===== POMOCNICZE =====
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ł/g, "l")
+  .replace(/[„”"'.,!?;:()\-–—]/g, " ").replace(/\s+/g, " ").trim();
+function lev(a, b) {
+  const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+  let prev = Array.from({length: n + 1}, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[n];
+}
+function textOk(ans, accs) {
+  const a = norm(ans); if (!a) return false;
+  for (const acc of accs) {
+    const n = norm(acc);
+    if (a === n) return true;
+    const tol = n.length >= 8 ? 2 : n.length >= 5 ? 1 : 0;
+    if (lev(a, n) <= tol) return true;
+    if (n.length >= 5 && a.includes(n)) return true;
+    if (a.split(" ").some(w => w.length >= 4 && lev(w, n) <= tol)) return true;
+  }
+  return false;
+}
+const ROM = [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+const toRoman = n => { let s = ""; for (const [v, r] of ROM) while (n >= v) { s += r; n -= v; } return s; };
+function fromRoman(s) { const v = {i:1,v:5,x:10,l:50,c:100,d:500,m:1000}; let t = 0; for (let i = 0; i < s.length; i++) { const a = v[s[i]], b = v[s[i + 1]] || 0; if (!a) return NaN; t += a < b ? -a : a; } return t; }
+function parseCentury(ans) {
+  let s = norm(ans).replace(/przed nasza era|naszej ery|p n e|pne|n e|wieku|wiek|\bw\b/g, " ").replace(/\s+/g, " ").trim();
+  const tok = s.split(" ")[0] || "";
+  if (/^\d+$/.test(tok)) return parseInt(tok, 10);
+  if (/^[ivxlcdm]+$/.test(tok)) return fromRoman(tok);
+  return NaN;
+}
+const parseNum = ans => { const m = String(ans).replace(/\s/g, "").match(/\d+/); return m ? parseInt(m[0], 10) : NaN; };
+const pts = q => q.type === "M" ? q.pairs.length : q.type === "G" ? (q.text.match(/\[/g) || []).length : q.type === "O" ? 2 : 1;
+const GRADES = [[96,"celujący","🏆"],[86,"bardzo dobry","🌟"],[71,"dobry","👍"],[51,"dostateczny","🙂"],[31,"dopuszczający","📚"],[0,"niedostateczny","💪"]];
+const gradeFor = p => GRADES.find(g => p >= g[0]);
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem("grecja_quiz_hist") || "[]"); } catch (e) { return []; } },
+  add(r) { try { const h = this.get(); h.unshift(r); localStorage.setItem("grecja_quiz_hist", JSON.stringify(h.slice(0, 8))); } catch (e) {} }
+};
+
+// ===== STAN =====
+let cfg = { topics: [1,2,3,4,5,6], count: 20, order: "topic", types: "all" };
+let ST = null;
+
+// ===== EKRAN STARTOWY =====
+function startScreen() {
+  const counts = {}; Q.forEach(q => counts[q.t] = (counts[q.t] || 0) + 1);
+  const hist = store.get();
+  $("#app").innerHTML = `
+  <div class="card">
+    <h2>Witaj! Sprawdź, co wiesz o starożytnej Grecji</h2>
+    <p class="small">W bazie jest <b>${Q.length}</b> pytań różnego rodzaju: wybór odpowiedzi, prawda/fałsz, wpisywanie, łączenie w pary, układanie w kolejności, uzupełnianie tekstu, obliczenia na osi czasu i pytania otwarte. Za każdym razem losują się inne.</p>
+  </div>
+  <div class="card">
+    <h2>1. Wybierz tematy</h2>
+    <div class="topicbox">
+      ${Object.entries(TOPICS).map(([k, v]) => `<label class="opt"><input type="checkbox" class="tp" value="${k}" ${cfg.topics.includes(+k) ? "checked" : ""}> <span><b>${k == 6 ? "★" : k + "."}</b> ${v} <span class="small">(${counts[k] || 0})</span></span></label>`).join("")}
+    </div>
+    <div class="row" style="margin-top:8px"><button class="pill" id="allT">zaznacz wszystkie</button><button class="pill" id="noneT">odznacz</button></div>
+  </div>
+  <div class="card">
+    <h2>2. Ile pytań?</h2>
+    <div class="row" id="cnt">${[10,20,30,50].map(n => `<button class="pill ${cfg.count === n ? "on" : ""}" data-n="${n}">${n}</button>`).join("")}<button class="pill ${cfg.count === 0 ? "on" : ""}" data-n="0">wszystkie</button></div>
+    <h2 style="margin-top:18px">3. Rodzaj pytań</h2>
+    <div class="row" id="typ">
+      <button class="pill ${cfg.types === "all" ? "on" : ""}" data-t="all">wszystkie rodzaje</button>
+      <button class="pill ${cfg.types === "closed" ? "on" : ""}" data-t="closed">tylko zamknięte</button>
+      <button class="pill ${cfg.types === "open" ? "on" : ""}" data-t="open">tylko do wpisania</button>
+    </div>
+    <h2 style="margin-top:18px">4. Kolejność</h2>
+    <div class="row" id="ord">
+      <button class="pill ${cfg.order === "topic" ? "on" : ""}" data-o="topic">po kolei, wg tematów</button>
+      <button class="pill ${cfg.order === "random" ? "on" : ""}" data-o="random">wymieszane</button>
+    </div>
+  </div>
+  <div class="actions" style="justify-content:center"><button class="btn gold" id="go" style="font-size:19px;padding:14px 40px">Zaczynamy! ▶</button></div>
+  ${hist.length ? `<div class="card hist"><h2 style="font-size:16px">Ostatnie wyniki</h2>${hist.map(h => `<div>${h.d} – ${h.p}% (${h.g}), ${h.n} pytań</div>`).join("")}</div>` : ""}`;
+  $("#allT").onclick = () => document.querySelectorAll(".tp").forEach(c => c.checked = true);
+  $("#noneT").onclick = () => document.querySelectorAll(".tp").forEach(c => c.checked = false);
+  document.querySelectorAll("#cnt .pill").forEach(b => b.onclick = () => { cfg.count = +b.dataset.n; startScreen(); });
+  document.querySelectorAll("#typ .pill").forEach(b => b.onclick = () => { saveTopics(); cfg.types = b.dataset.t; startScreen(); });
+  document.querySelectorAll("#ord .pill").forEach(b => b.onclick = () => { saveTopics(); cfg.order = b.dataset.o; startScreen(); });
+  $("#go").onclick = () => { saveTopics(); if (!cfg.topics.length) { alertBox("Zaznacz przynajmniej jeden temat."); return; } begin(); };
+}
+function saveTopics() { cfg.topics = [...document.querySelectorAll(".tp")].filter(c => c.checked).map(c => +c.value); }
+function alertBox(msg) { const d = document.createElement("div"); d.className = "fb bad"; d.textContent = msg; $("#app").prepend(d); setTimeout(() => d.remove(), 2500); }
+
+const CLOSED = ["C","TF","M","O","G"], OPEN = ["S","N","W","P"];
+function pick() {
+  let pool = Q.filter(q => cfg.topics.includes(q.t));
+  if (cfg.types === "closed") pool = pool.filter(q => CLOSED.includes(q.type));
+  if (cfg.types === "open") pool = pool.filter(q => OPEN.includes(q.type));
+  const n = cfg.count === 0 ? pool.length : Math.min(cfg.count, pool.length);
+  // losowanie równomierne z tematów, z mieszaniem typów
+  const byT = {}; shuffle(pool).forEach(q => (byT[q.t] = byT[q.t] || []).push(q));
+  for (const t in byT) { // przeplot typów w obrębie tematu
+    const byType = {}; byT[t].forEach(q => (byType[q.type] = byType[q.type] || []).push(q));
+    const lists = shuffle(Object.values(byType)), out = [];
+    while (lists.some(l => l.length)) lists.forEach(l => l.length && out.push(l.shift()));
+    byT[t] = out;
+  }
+  const keys = shuffle(Object.keys(byT)), chosen = [];
+  while (chosen.length < n) { let added = false; for (const k of keys) { if (chosen.length >= n) break; if (byT[k].length) { chosen.push(byT[k].shift()); added = true; } } if (!added) break; }
+  return cfg.order === "topic" ? chosen.sort((a, b) => a.t - b.t) : shuffle(chosen);
+}
+function begin(list) {
+  const qs = list || pick();
+  ST = { qs, i: 0, got: 0, max: 0, log: [] };
+  showQ();
+}
+
+// ===== PYTANIE =====
+let cur = null; // stan bieżącego pytania
+function showQ() {
+  const q = ST.qs[ST.i]; cur = { q, done: false };
+  const pct = Math.round(ST.i / ST.qs.length * 100);
+  let body = "";
+  if (q.type === "C") {
+    cur.opts = shuffle(q.opts);
+    body = `<div class="choices">${cur.opts.map((o, i) => `<button class="choice" data-i="${i}">${String.fromCharCode(65 + i)}. ${esc(o)}</button>`).join("")}</div>`;
+  } else if (q.type === "TF") {
+    body = `<div class="tf"><button class="choice" data-v="1">✔ PRAWDA</button><button class="choice" data-v="0">✘ FAŁSZ</button></div>`;
+  } else if (q.type === "S" || q.type === "N" || q.type === "W") {
+    const ph = q.type === "N" ? "wpisz liczbę" : q.type === "W" ? "np. V w. p.n.e." : "wpisz odpowiedź";
+    body = `<input type="text" id="inp" placeholder="${ph}" autocomplete="off">${q.type === "W" ? `<div class="hint">Możesz wpisać cyframi rzymskimi (V) albo arabskimi (5).</div>` : ""}`;
+  } else if (q.type === "M") {
+    cur.right = shuffle(q.pairs.map(p => p[1]));
+    body = q.pairs.map((p, i) => `<div class="mrow"><b>${esc(p[0])}</b><select data-i="${i}"><option value="">— wybierz —</option>${cur.right.map(r => `<option>${esc(r)}</option>`).join("")}</select></div>`).join("");
+  } else if (q.type === "O") {
+    cur.arr = shuffle(q.items); if (cur.arr.every((x, i) => x === q.items[i])) cur.arr.reverse();
+    body = `<ul class="order" id="ol"></ul><div class="hint">Przesuwaj strzałkami ▲▼ – na górze najwcześniejsze.</div>`;
+  } else if (q.type === "G") {
+    const ans = [...q.text.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
+    cur.gaps = ans; const bank = shuffle([...new Set([...ans, ...(q.extra || [])])]);
+    let k = 0;
+    body = `<div class="gap">${esc(q.text).replace(/\[([^\]]+)\]/g, () => `<select data-i="${k++}"><option value="">……</option>${bank.map(b => `<option>${esc(b)}</option>`).join("")}</select>`)}</div>`;
+  } else if (q.type === "P") {
+    body = `<textarea id="inp" rows="4" placeholder="Napisz swoją odpowiedź…"></textarea><div class="hint">To pytanie otwarte – po napisaniu zobaczysz wzorcową odpowiedź i sam(a) ocenisz swoją.</div>`;
+  }
+  $("#app").innerHTML = `
+  <div class="top"><span>Pytanie ${ST.i + 1} z ${ST.qs.length}</span><span>Punkty: <b>${fmt(ST.got)}</b> / ${ST.max}</span></div>
+  <div class="bar"><div style="width:${pct}%"></div></div>
+  <div class="card">
+    <span class="tag">${q.t == 6 ? "★" : q.t + "."} ${TOPICS[q.t]} · ${typeName(q.type)}</span>
+    <div class="qtext">${esc(q.type === "TF" ? "Prawda czy fałsz? " + q.q : q.q)}</div>
+    ${body}
+    <div id="fb"></div>
+    <div class="actions"><button class="btn sec" id="quit">Zakończ</button><button class="btn" id="chk">Sprawdź</button></div>
+  </div>`;
+  $("#quit").onclick = () => { if (ST.log.length) results(); else startScreen(); };
+  $("#chk").onclick = check;
+  if (q.type === "C" || q.type === "TF") {
+    document.querySelectorAll(".choice").forEach(b => b.onclick = () => { if (cur.done) return; document.querySelectorAll(".choice").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); cur.sel = b; });
+  }
+  if (q.type === "O") drawOrder();
+  const inp = $("#inp"); if (inp) { inp.focus(); if (q.type !== "P") inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("#chk").click(); } }); }
+}
+const typeName = t => ({C:"wybierz odpowiedź",TF:"prawda / fałsz",S:"wpisz odpowiedź",N:"oblicz",W:"określ wiek",M:"połącz w pary",O:"ułóż w kolejności",G:"uzupełnij tekst",P:"pytanie otwarte"}[t]);
+const fmt = x => Number.isInteger(x) ? x : x.toFixed(1).replace(".", ",");
+function drawOrder() {
+  $("#ol").innerHTML = cur.arr.map((x, i) => `<li><span class="num">${i + 1}</span><span class="txt">${esc(x)}</span><button data-u="${i}" ${i === 0 ? "disabled" : ""}>▲</button><button data-d="${i}" ${i === cur.arr.length - 1 ? "disabled" : ""}>▼</button></li>`).join("");
+  $("#ol").querySelectorAll("button").forEach(b => b.onclick = () => {
+    if (cur.done) return;
+    const i = +(b.dataset.u ?? b.dataset.d), j = b.dataset.u !== undefined ? i - 1 : i + 1;
+    [cur.arr[i], cur.arr[j]] = [cur.arr[j], cur.arr[i]]; drawOrder();
+  });
+}
+
+function check() {
+  const q = cur.q;
+  if (cur.done) return next();
+  let score = 0, max = pts(q), your = "", correct = "", fbExtra = "";
+  if (q.type === "C") {
+    if (!cur.sel) return hint("Zaznacz odpowiedź.");
+    const pick = cur.opts[+cur.sel.dataset.i]; your = pick; correct = q.opts[0];
+    score = pick === q.opts[0] ? 1 : 0;
+    document.querySelectorAll(".choice").forEach(b => { b.disabled = true; const o = cur.opts[+b.dataset.i]; if (o === q.opts[0]) b.classList.add("ok"); else if (b === cur.sel) b.classList.add("bad"); });
+  } else if (q.type === "TF") {
+    if (!cur.sel) return hint("Wybierz: prawda czy fałsz.");
+    const v = cur.sel.dataset.v === "1"; your = v ? "prawda" : "fałsz"; correct = q.a ? "prawda" : "fałsz";
+    score = v === q.a ? 1 : 0;
+    document.querySelectorAll(".choice").forEach(b => { b.disabled = true; if ((b.dataset.v === "1") === q.a) b.classList.add("ok"); else if (b === cur.sel) b.classList.add("bad"); });
+  } else if (q.type === "S" || q.type === "N" || q.type === "W") {
+    const inp = $("#inp"), v = inp.value.trim(); if (!v) return hint("Wpisz odpowiedź.");
+    your = v;
+    if (q.type === "S") { score = textOk(v, q.acc) ? 1 : 0; correct = q.acc[0]; }
+    if (q.type === "N") { score = parseNum(v) === q.a ? 1 : 0; correct = String(q.a); }
+    if (q.type === "W") { score = parseCentury(v) === q.a ? 1 : 0; correct = toRoman(q.a) + " w." + (q.bc ? " p.n.e." : " n.e."); }
+    inp.classList.add(score ? "ok" : "bad"); inp.disabled = true;
+  } else if (q.type === "M") {
+    const sels = [...document.querySelectorAll(".mrow select")];
+    if (sels.some(s => !s.value)) return hint("Dopasuj wszystkie elementy.");
+    sels.forEach(s => { const p = q.pairs[+s.dataset.i]; const ok = s.value === p[1]; if (ok) score++; s.classList.add(ok ? "ok" : "bad"); s.disabled = true; });
+    your = sels.map(s => q.pairs[+s.dataset.i][0] + " → " + s.value).join("; ");
+    correct = q.pairs.map(p => p[0] + " → " + p[1]).join("; ");
+    if (score < max) fbExtra = "<br><b>Poprawnie:</b><br>" + q.pairs.map(p => `${esc(p[0])} → ${esc(p[1])}`).join("<br>");
+  } else if (q.type === "O") {
+    const good = cur.arr.filter((x, i) => x === q.items[i]).length;
+    score = good === q.items.length ? 2 : good >= Math.ceil(q.items.length / 2) ? 1 : 0;
+    $("#ol").querySelectorAll("li").forEach((li, i) => { li.classList.add(cur.arr[i] === q.items[i] ? "ok" : "bad"); li.querySelectorAll("button").forEach(b => b.disabled = true); });
+    your = cur.arr.join(" → "); correct = q.items.join(" → ");
+    if (score < 2) fbExtra = "<br><b>Poprawna kolejność:</b><br>" + q.items.map((x, i) => `${i + 1}. ${esc(x)}`).join("<br>");
+  } else if (q.type === "G") {
+    const sels = [...document.querySelectorAll(".gap select")];
+    if (sels.some(s => !s.value)) return hint("Uzupełnij wszystkie luki.");
+    sels.forEach(s => { const ok = s.value === cur.gaps[+s.dataset.i]; if (ok) score++; s.classList.add(ok ? "ok" : "bad"); s.disabled = true; });
+    your = sels.map(s => s.value).join(", "); correct = cur.gaps.join(", ");
+    if (score < max) fbExtra = "<br><b>Poprawnie:</b> " + cur.gaps.map(esc).join(", ");
+  } else if (q.type === "P") {
+    const inp = $("#inp"), v = inp.value.trim(); if (!v) return hint("Napisz choć krótką odpowiedź.");
+    inp.disabled = true; cur.done = "self";
+    $("#fb").innerHTML = `<div class="fb info"><b>Przykładowa dobra odpowiedź:</b><br>${esc(q.model)}<br><br>Porównaj ze swoją. Jak oceniasz swoją odpowiedź?</div>
+      <div class="row" style="margin-top:10px"><button class="btn" data-s="1" style="background:var(--ok)">Dobrze (1 pkt)</button><button class="btn gold" data-s="0.5">Częściowo (½ pkt)</button><button class="btn" data-s="0" style="background:var(--bad)">Źle (0 pkt)</button></div>`;
+    $("#chk").style.display = "none";
+    document.querySelectorAll("[data-s]").forEach(b => b.onclick = () => {
+      const s = +b.dataset.s; record(q, s, 1, v, q.model);
+      document.querySelectorAll("[data-s]").forEach(x => x.disabled = true);
+      $("#chk").style.display = ""; $("#chk").textContent = ST.i + 1 < ST.qs.length ? "Dalej ▶" : "Zobacz wynik 🏁"; cur.done = true; $("#chk").focus();
+    });
+    return;
+  }
+  record(q, score, max, your, correct);
+  const cls = score === max ? "ok" : score > 0 ? "mid" : "bad";
+  const head = score === max ? pickPraise() : score > 0 ? `Częściowo dobrze (${fmt(score)} / ${max} pkt).` : "Niestety nie.";
+  let body = "";
+  if (score < max && ["C","TF","S","N","W"].includes(q.type)) body += ` Poprawna odpowiedź: <b>${esc(correct)}</b>.`;
+  body += fbExtra;
+  if (q.e) body += `<br><span class="small">💡 ${esc(q.e)}</span>`;
+  $("#fb").innerHTML = `<div class="fb ${cls}"><b>${head}</b>${body}</div>`;
+  cur.done = true;
+  $("#chk").textContent = ST.i + 1 < ST.qs.length ? "Dalej ▶" : "Zobacz wynik 🏁";
+  $("#chk").focus();
+}
+const PRAISE = ["Brawo!","Świetnie!","Dokładnie tak!","Super!","Doskonale!","Tak jest!","Bezbłędnie!"];
+const pickPraise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
+function hint(m) { $("#fb").innerHTML = `<div class="fb mid">${m}</div>`; }
+function record(q, score, max, your, correct) { ST.got += score; ST.max += max; ST.log.push({q, score, max, your, correct}); }
+function next() { ST.i++; if (ST.i >= ST.qs.length) results(); else showQ(); }
+document.addEventListener("keydown", e => { if (e.key === "Enter" && cur && cur.done === true && document.activeElement.tagName !== "TEXTAREA") { e.preventDefault(); next(); } });
+
+// ===== WYNIKI =====
+function results() {
+  cur = null;
+  const p = ST.max ? Math.round(ST.got / ST.max * 100) : 0; const g = gradeFor(p);
+  const wrong = ST.log.filter(l => l.score < l.max);
+  const d = new Date(); store.add({d: d.toLocaleDateString("pl-PL") + " " + d.toLocaleTimeString("pl-PL", {hour: "2-digit", minute: "2-digit"}), p, g: g[1], n: ST.log.length});
+  const perT = {}; ST.log.forEach(l => { const t = l.q.t; perT[t] = perT[t] || [0, 0]; perT[t][0] += l.score; perT[t][1] += l.max; });
+  $("#app").innerHTML = `
+  <div class="card" style="text-align:center">
+    <h2>Koniec quizu!</h2>
+    <div style="font-size:46px">${g[2]}</div>
+    <div class="big">${p}%</div>
+    <div class="grade">Ocena: ${g[1]}</div>
+    <div class="small">${fmt(ST.got)} / ${ST.max} pkt · ${ST.log.length} pytań</div>
+  </div>
+  <div class="card"><h2 style="font-size:17px">Wynik w tematach</h2>
+    ${Object.keys(perT).sort().map(t => { const [a, b] = perT[t], pp = Math.round(a / b * 100); return `<div style="margin:6px 0"><div class="small">${t == 6 ? "★" : t + "."} ${TOPICS[t]} – ${pp}%</div><div class="bar" style="margin:3px 0 0"><div style="width:${pp}%"></div></div></div>`; }).join("")}
+  </div>
+  <div class="actions" style="justify-content:center">
+    ${wrong.length ? `<button class="btn gold" id="again">Powtórz błędne (${wrong.length})</button>` : ""}
+    <button class="btn" id="newq">Nowy quiz</button>
+  </div>
+  ${wrong.length ? `<div class="card"><h2 style="font-size:17px">Do poprawki</h2>${wrong.map(l => `<div class="rev"><div class="q">${esc(l.q.type === "G" ? l.q.text.replace(/\[[^\]]+\]/g, "……") : l.q.q)}</div><div class="y">Twoja odpowiedź: ${esc(l.your)}</div><div class="c">Poprawnie: ${esc(l.correct)}</div></div>`).join("")}</div>` : `<div class="card" style="text-align:center">Wszystko bezbłędnie – gratulacje! 🎉</div>`}`;
+  if (wrong.length) $("#again").onclick = () => begin(shuffle(wrong.map(l => l.q)));
+  $("#newq").onclick = startScreen;
+  window.scrollTo(0, 0);
+}
+
+startScreen();
+</script>
+</body>
+</html>

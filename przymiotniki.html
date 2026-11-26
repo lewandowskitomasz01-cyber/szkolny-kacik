@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stopniowanie przymiotników</title>
+<style>
+:root{--pink:#f7b9c4;--pinkink:#4a1f2a;--blue:#cfe2fb;--blueink:#1c3561;--yellow:#fdf0c4;--yellowink:#7a5300;
+  --paper:#fffaf5;--ink:#2b2b2b;--mute:#6b6b6b;--line:#9a9a9a;--ok:#2e8b57;--okbg:#e4f4ea;--bad:#c0392b;--badbg:#fbe9e7;--mid:#b07d00;--midbg:#fff4d6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,"DejaVu Sans",sans-serif;font-size:17px}
+header{background:var(--pink);color:var(--pinkink);padding:16px 16px 14px;text-align:center}
+header h1{margin:0;font-size:clamp(20px,4.6vw,27px);letter-spacing:.3px}
+main{max-width:720px;margin:0 auto;padding:14px 16px 40px}
+.meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;color:var(--mute);font-size:14px;margin:4px 0 14px}
+.ex{margin-bottom:22px}
+.exh{background:var(--blue);color:var(--blueink);border-radius:10px;padding:9px 14px;font-weight:800;font-size:18px;margin-bottom:10px}
+.exh small{font-weight:600;opacity:.8;font-size:13px;display:block;margin-top:2px}
+ol{margin:0;padding-left:28px}
+ol li{margin:0 0 12px;line-height:1.9}
+input[type=text]{font:inherit;font-size:16px;border:0;border-bottom:2px solid var(--line);background:transparent;padding:2px 4px;width:150px;max-width:100%;color:var(--ink)}
+input[type=text]:focus{outline:none;border-bottom-color:var(--blueink);background:#fff}
+input.wide{width:100%;margin-top:4px}
+input.ok{border-bottom-color:var(--ok);background:var(--okbg)} input.bad{border-bottom-color:var(--bad);background:var(--badbg)} input.mid{border-bottom-color:var(--mid);background:var(--midbg)}
+.adj{color:var(--mute)}
+.opt{font:inherit;font-size:16px;border:2px solid transparent;background:#f1f1f1;border-radius:8px;padding:2px 9px;margin:0 2px;cursor:pointer;color:var(--ink)}
+.opt:hover{background:#e7eefb}
+.opt.sel{border-color:var(--blueink);background:#fff;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.opt.ok{border-color:var(--ok);background:var(--okbg)} .opt.bad{border-color:var(--bad);background:var(--badbg);text-decoration:line-through}
+.opt:disabled{cursor:default}
+.fb{font-size:14px;line-height:1.4;margin-top:2px}
+.fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)} .fb.mid{color:var(--mid)}
+.remember{background:var(--yellow);color:#3d3200;border-radius:10px;padding:12px 16px;margin:6px 0 22px;font-size:15px;line-height:1.55}
+.remember b.h{color:var(--yellowink);font-size:17px;display:block;margin-bottom:4px}
+.remember table{border-collapse:collapse;margin-top:6px}
+.remember td{padding:2px 12px 2px 0;vertical-align:top}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.btn{font:inherit;font-weight:800;border:0;border-radius:12px;padding:13px 24px;cursor:pointer;background:var(--blueink);color:#fff;font-size:17px}
+.btn.sec{background:#fff;color:var(--blueink);border:2px solid var(--blueink)}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid #e0525a;outline-offset:2px}
+.result{background:#fff;border:2px solid var(--blue);border-radius:14px;padding:16px;text-align:center;margin:14px 0}
+.result .big{font-size:44px;font-weight:900;color:var(--blueink)}
+.result .g{font-size:20px;font-weight:800}
+.hint{color:var(--mute);font-size:14px;text-align:center;margin-top:8px}
+.hist{color:var(--mute);font-size:13px;margin-top:20px}
+</style>
+</head>
+<body>
+<header><h1>Stopniowanie przymiotników – ćwiczenia <span id="setno">1</span></h1></header>
+<main>
+  <div class="meta"><span>Angielski · klasa 5</span><span>Każdy zestaw losuje nowe zdania</span></div>
+
+  <div class="remember">
+    <b class="h">Pamiętaj!</b>
+    <table>
+      <tr><td><b>krótkie</b></td><td>old → older → the oldest</td></tr>
+      <tr><td><b>na -e</b></td><td>nice → nicer → the nicest</td></tr>
+      <tr><td><b>podwójna litera</b></td><td>big → bigger → the biggest (hot, thin)</td></tr>
+      <tr><td><b>na -y</b></td><td>happy → happier → the happiest</td></tr>
+      <tr><td><b>długie</b></td><td>beautiful → more beautiful → the most beautiful</td></tr>
+      <tr><td><b>nieregularne</b></td><td>good → better → the best<br>bad → worse → the worst<br>far → farther → the farthest</td></tr>
+    </table>
+    <div style="margin-top:6px">Stopień wyższy + <b>than</b> (niż). Stopień najwyższy zawsze z <b>the</b>.</div>
+  </div>
+
+  <div id="sheet"></div>
+  <div id="res"></div>
+  <div class="actions">
+    <button class="btn" id="check" type="button">Sprawdź ✔</button>
+    <button class="btn sec" id="new" type="button">Nowy zestaw ↻</button>
+  </div>
+  <p class="hint">Po sprawdzeniu zobaczysz poprawne odpowiedzi.</p>
+  <div class="hist" id="hist"></div>
+</main>
+
+<script>
+// ===== BAZA =====
+// Ćw. 1: [zdanie z ___, przymiotnik, poprawne odpowiedzi]
+const EX1 = [
+ ["My brother is ___ than me.","old",["older"]],
+ ["This soup is ___ than that soup.","good",["better"]],
+ ["The weather is ___ than last week.","bad",["worse"]],
+ ["A car is ___ than a bike.","fast",["faster"]],
+ ["My bag is ___ than your bag.","heavy",["heavier"]],
+ ["An elephant is ___ than a horse.","big",["bigger"]],
+ ["Today is ___ than yesterday.","hot",["hotter"]],
+ ["This book is ___ than that film.","interesting",["more interesting"]],
+ ["Maths is ___ than Art.","difficult",["more difficult"]],
+ ["My sister is ___ than my brother.","young",["younger"]],
+ ["Tom is ___ than Ben.","tall",["taller"]],
+ ["This T-shirt is ___ than that one.","cheap",["cheaper"]],
+ ["A plane is ___ than a car.","expensive",["more expensive"]],
+ ["Winter is ___ than autumn.","cold",["colder"]],
+ ["This test is ___ than the last one.","easy",["easier"]],
+ ["My cat is ___ than my dog.","small",["smaller"]],
+ ["Your room is ___ than mine.","nice",["nicer"]],
+ ["This cartoon is ___ than that one.","funny",["funnier"]],
+ ["Football is ___ than golf in Poland.","popular",["more popular"]],
+ ["The sofa is ___ than the chair.","comfortable",["more comfortable"]],
+ ["This road is ___ than that road.","long",["longer"]],
+ ["I am ___ today than yesterday.","happy",["happier"]],
+ ["A turtle is ___ than a rabbit.","slow",["slower"]],
+ ["My house is ___ from school than yours.","far",["farther","further"]],
+ ["Lions are ___ than cats.","dangerous",["more dangerous"]],
+ ["This pencil is ___ than that pen.","thin",["thinner"]],
+ ["My new school is ___ than my old school.","large",["larger"]],
+ ["Your handwriting is ___ than mine.","bad",["worse"]],
+ ["She is ___ at English than her brother.","good",["better"]],
+ ["Bikes are ___ than cars.","cheap",["cheaper"]],
+ ["She is ___ dancer in our class.","good",["the best"]],
+ ["This is ___ test I have ever written.","bad",["the worst"]],
+ ["A giraffe is ___ animal in the zoo.","tall",["the tallest"]],
+ ["The blue whale is ___ animal in the world.","big",["the biggest"]],
+ ["Mount Everest is ___ mountain in the world.","high",["the highest"]],
+ ["This is ___ picture in the museum.","beautiful",["the most beautiful"]],
+ ["January is ___ month of the year.","cold",["the coldest"]],
+ ["Kate is ___ girl in our family.","young",["the youngest"]],
+ ["This is ___ phone in the shop.","expensive",["the most expensive"]],
+ ["Today is ___ day of my life!","happy",["the happiest"]],
+ ["The cheetah is ___ animal in the world.","fast",["the fastest"]],
+ ["Lucy is ___ person I know.","funny",["the funniest"]],
+ ["This is ___ exercise in the book.","easy",["the easiest"]],
+ ["Warsaw is ___ city in Poland.","large",["the largest","the biggest"]],
+ ["This is ___ lesson this week.","interesting",["the most interesting"]],
+ ["It is ___ day of the summer.","hot",["the hottest"]],
+ ["My grandpa is ___ person in our family.","old",["the oldest"]],
+ ["That was ___ question in the quiz.","difficult",["the most difficult"]],
+ ["Harry Potter is ___ book in our class.","popular",["the most popular"]],
+ ["This is ___ café in town.","nice",["the nicest"]],
+ ["The Vistula is ___ river in Poland.","long",["the longest"]],
+ ["This is ___ bed in the house.","comfortable",["the most comfortable"]],
+ ["This is ___ pizza I have ever eaten!","good",["the best"]],
+ ["My box is ___ box in the room.","heavy",["the heaviest"]]
+];
+// Ćw. 2: [przed, opcja A, opcja B, po, która poprawna (0/1)]
+const EX2 = [
+ ["Lisa is","younger","more young","than Kate.",0],
+ ["This is","the easiest","the most easy","exercise.",0],
+ ["Chocolate is","more tasty","tastier","than bread.",1],
+ ["My dad has","the better","the best","car in our street.",1],
+ ["Maths is","more difficult","difficulter","than English.",0],
+ ["Anna is","the most beautiful","the beautifulest","girl in school.",0],
+ ["My dog is","biger","bigger","than your dog.",1],
+ ["Today is","hoter","hotter","than yesterday.",1],
+ ["This is","the worst","the baddest","day ever!",0],
+ ["Your bike is","gooder","better","than mine.",1],
+ ["Ola is","happier","more happy","than Zosia.",0],
+ ["This is","the most interesting","the interestingest","book in the library.",0],
+ ["A mouse is","smaller","more small","than a cat.",0],
+ ["English is","easier","easyer","than German.",0],
+ ["Paris is","more big","bigger","than Kraków.",1],
+ ["My room is","tidyer","tidier","than my brother's room.",1],
+ ["This is","the funniest","the most funny","cartoon on TV.",0],
+ ["Running is","more tiring","tiringer","than walking.",0],
+ ["Tom is","the tallest","the most tall","boy in our class.",0],
+ ["My hair is","longer","more long","than your hair.",0],
+ ["Tigers are","more dangerous","dangerouser","than dogs.",0],
+ ["Sunday is","the best","the goodest","day of the week.",0],
+ ["This test was","badder","worse","than the last one.",1],
+ ["My phone is","more expensive","expensiver","than yours.",0],
+ ["Kasia is","the nicest","the most nice","girl in our class.",0],
+ ["The sea is","larger","more large","than the lake.",0],
+ ["Winter is","colder","more cold","than spring.",0],
+ ["Grandma's cake is","more delicious","deliciouser","than mine.",0],
+ ["This is","the heaviest","the heavyest","box in the room.",0],
+ ["Cats are","more popular","popularer","than hamsters.",0],
+ ["My house is","farther","farer","from school than Ola's house.",0],
+ ["This is","the thinnest","the thinest","book on the shelf.",0],
+ ["Lisa is fast, but Kate is","faster","more fast",".",0],
+ ["Today I am","busier","more busy","than yesterday.",0],
+ ["This is","the cheapest","the most cheap","T-shirt in the shop.",0],
+ ["Elephants are","heavier","more heavy","than horses.",0],
+ ["July is","the hottest","the most hot","month of the year.",0],
+ ["My brother is","older","more old","than my sister.",0],
+ ["This film is","more boring","boringer","than that book.",0],
+ ["She is","the best","the most good","singer in our school.",0]
+];
+// Ćw. 3: [po polsku, akceptowane odpowiedzi]
+const EX3 = [
+ ["Ten dom jest większy niż tamten dom.",["This house is bigger than that house.","This house is bigger than that one.","This house is larger than that house.","This house is larger than that one."]],
+ ["To jest najciekawsza książka w bibliotece.",["This is the most interesting book in the library."]],
+ ["Ta zupa jest gorsza niż tamta zupa.",["This soup is worse than that soup.","This soup is worse than that one."]],
+ ["Mój brat jest starszy niż ja.",["My brother is older than me.","My brother is older than I am.","My brother is older than I."]],
+ ["Kot jest mniejszy niż pies.",["A cat is smaller than a dog.","The cat is smaller than the dog.","Cats are smaller than dogs.","The cat is smaller than a dog.","A cat is smaller than the dog."]],
+ ["Słoń jest największym zwierzęciem w zoo.",["The elephant is the biggest animal in the zoo.","An elephant is the biggest animal in the zoo.","The elephant is the largest animal in the zoo.","An elephant is the largest animal in the zoo."]],
+ ["Mój pokój jest ładniejszy niż twój pokój.",["My room is nicer than your room.","My room is nicer than yours.","My room is prettier than your room.","My room is prettier than yours."]],
+ ["Matematyka jest trudniejsza niż angielski.",["Maths is more difficult than English.","Math is more difficult than English.","Maths is harder than English.","Math is harder than English."]],
+ ["Dzisiaj jest zimniej niż wczoraj.",["It is colder today than yesterday.","Today is colder than yesterday.","Today it is colder than yesterday.","It is colder today than it was yesterday."]],
+ ["Ona jest najlepszą uczennicą w klasie.",["She is the best student in the class.","She is the best pupil in the class.","She is the best student in our class.","She is the best pupil in our class.","She is the best student in her class.","She is the best pupil in her class."]],
+ ["To jest najgorszy dzień w moim życiu.",["This is the worst day of my life.","This is the worst day in my life."]],
+ ["Samolot jest szybszy niż samochód.",["A plane is faster than a car.","The plane is faster than the car.","Planes are faster than cars.","An airplane is faster than a car.","An aeroplane is faster than a car."]],
+ ["Moja siostra jest młodsza niż ja.",["My sister is younger than me.","My sister is younger than I am.","My sister is younger than I."]],
+ ["Ten test jest łatwiejszy niż tamten.",["This test is easier than that one.","This test is easier than that test."]],
+ ["Żyrafa jest najwyższym zwierzęciem na świecie.",["The giraffe is the tallest animal in the world.","A giraffe is the tallest animal in the world.","Giraffes are the tallest animals in the world."]],
+ ["Ten telefon jest droższy niż tamten.",["This phone is more expensive than that one.","This phone is more expensive than that phone."]],
+ ["Lipiec jest najgorętszym miesiącem roku.",["July is the hottest month of the year.","July is the hottest month in the year."]],
+ ["Mój tata jest wyższy niż mój dziadek.",["My dad is taller than my grandpa.","My dad is taller than my grandfather.","My father is taller than my grandfather.","My father is taller than my grandpa.","My dad is taller than my granddad.","My dad is taller than my grandad."]],
+ ["Piłka nożna jest bardziej popularna niż tenis.",["Football is more popular than tennis.","Soccer is more popular than tennis."]],
+ ["To jest najładniejsza sukienka w sklepie.",["This is the nicest dress in the shop.","This is the prettiest dress in the shop.","This is the most beautiful dress in the shop.","This is the nicest dress in the store.","This is the prettiest dress in the store.","This is the most beautiful dress in the store."]],
+ ["Mój plecak jest cięższy niż twój.",["My backpack is heavier than yours.","My rucksack is heavier than yours.","My schoolbag is heavier than yours.","My bag is heavier than yours.","My backpack is heavier than your backpack.","My schoolbag is heavier than your schoolbag."]],
+ ["Kasia jest najzabawniejszą osobą w klasie.",["Kasia is the funniest person in the class.","Kasia is the funniest person in our class.","Kasia is the funniest person in her class."]],
+ ["Rower jest tańszy niż samochód.",["A bike is cheaper than a car.","A bicycle is cheaper than a car.","Bikes are cheaper than cars.","The bike is cheaper than the car."]],
+ ["Dzisiaj jestem szczęśliwsza niż wczoraj.",["I am happier today than yesterday.","Today I am happier than yesterday.","I am happier today than I was yesterday."]],
+ ["Wisła jest najdłuższą rzeką w Polsce.",["The Vistula is the longest river in Poland.","Vistula is the longest river in Poland.","The Wisla is the longest river in Poland.","Wisla is the longest river in Poland."]],
+ ["Mój pies jest najszybszym psem w parku.",["My dog is the fastest dog in the park."]],
+ ["Ta lekcja jest nudniejsza niż tamta.",["This lesson is more boring than that one.","This lesson is more boring than that lesson."]],
+ ["Mój dziadek jest najstarszą osobą w rodzinie.",["My grandpa is the oldest person in the family.","My grandpa is the oldest person in my family.","My grandpa is the oldest person in our family.","My grandfather is the oldest person in the family.","My grandfather is the oldest person in my family.","My grandfather is the oldest person in our family."]]
+];
+
+// ===== POMOCNICZE =====
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const CONTR = [[/\bi'm\b/g,"i am"],[/\bit's\b/g,"it is"],[/\bshe's\b/g,"she is"],[/\bhe's\b/g,"he is"],[/\bisn't\b/g,"is not"],[/\baren't\b/g,"are not"],[/\bthey're\b/g,"they are"],[/\bwe're\b/g,"we are"],[/\byou're\b/g,"you are"]];
+function norm(s) {
+  s = String(s).toLowerCase().replace(/[’`]/g, "'").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ł/g, "l");
+  CONTR.forEach(([r, v]) => s = s.replace(r, v));
+  return s.replace(/[.,!?;:"]/g, " ").replace(/\s+/g, " ").trim();
+}
+function lev(a, b) {
+  const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+  let prev = Array.from({length: n + 1}, (_, j) => j);
+  for (let i = 1; i <= m; i++) { const cur = [i]; for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = cur; }
+  return prev[n];
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const GRADES = [[96,"celujący","🏆"],[86,"bardzo dobry","🌟"],[71,"dobry","👍"],[51,"dostateczny","🙂"],[31,"dopuszczający","📚"],[0,"niedostateczny","💪"]];
+
+// ===== ZESTAW =====
+let S = null;
+function newSet() {
+  const comp = shuffle(EX1.filter(x => !x[2][0].startsWith("the "))).slice(0, 3);
+  const sup = shuffle(EX1.filter(x => x[2][0].startsWith("the "))).slice(0, 3);
+  S = { e1: shuffle([...comp, ...sup]), e2: shuffle(EX2).slice(0, 6).map(x => ({x, swap: Math.random() < .5, sel: null})), e3: shuffle(EX3).slice(0, 3), done: false };
+  const n = store.get("przym_setno", 0) + 1; store.set("przym_setno", n); $("#setno").textContent = n;
+  render();
+}
+function render() {
+  $("#res").innerHTML = "";
+  $("#check").textContent = "Sprawdź ✔"; $("#check").disabled = false;
+  $("#sheet").innerHTML = `
+  <section class="ex"><div class="exh">Ćw. 1 Stopień wyższy lub najwyższy:<small>Wpisz właściwą formę przymiotnika z nawiasu.</small></div>
+    <ol>${S.e1.map((q, i) => { const [a, b] = q[0].split("___"); return `<li>${esc(a)}<span class="adj">(${esc(q[1])})</span> <input type="text" id="e1_${i}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Odpowiedź ${i + 1}"> ${esc(b)}<div class="fb" id="f1_${i}"></div></li>`; }).join("")}</ol>
+  </section>
+  <section class="ex"><div class="exh">Ćw. 2 Podkreśl poprawną odpowiedź:<small>Stuknij w poprawną formę.</small></div>
+    <ol>${S.e2.map((o, i) => { const q = o.x; const opts = o.swap ? [[q[2], 1], [q[1], 0]] : [[q[1], 0], [q[2], 1]];
+      return `<li>${esc(q[0])} (${opts.map(([t, k], j) => `<button type="button" class="opt" data-i="${i}" data-k="${k}">${esc(t)}</button>${j === 0 ? " / " : ""}`).join("")}) ${esc(q[3])}<div class="fb" id="f2_${i}"></div></li>`; }).join("")}</ol>
+  </section>
+  <section class="ex"><div class="exh">Ćw. 3 Przetłumacz na angielski:<small>Napisz całe zdanie.</small></div>
+    <ol>${S.e3.map((q, i) => `<li>${esc(q[0])}<input type="text" class="wide" id="e3_${i}" autocomplete="off" autocapitalize="sentences" spellcheck="false" aria-label="Tłumaczenie ${i + 1}"><div class="fb" id="f3_${i}"></div></li>`).join("")}</ol>
+  </section>`;
+  document.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    if (S.done) return; const i = +b.dataset.i;
+    document.querySelectorAll(`.opt[data-i="${i}"]`).forEach(x => x.classList.remove("sel"));
+    b.classList.add("sel"); S.e2[i].sel = +b.dataset.k;
+  });
+  renderHist();
+}
+function check() {
+  if (S.done) { newSet(); window.scrollTo(0, 0); return; }
+  let got = 0, max = 0;
+  // Ćw. 1
+  S.e1.forEach((q, i) => {
+    const inp = $("#e1_" + i), v = norm(inp.value), fb = $("#f1_" + i); max++;
+    const acc = q[2].map(norm); const sup = acc[0].startsWith("the ");
+    let cls = "bad", msg = "";
+    if (acc.includes(v)) { got++; cls = "ok"; msg = "Dobrze!"; }
+    else if (sup && acc.includes("the " + v)) { got += .5; cls = "mid"; msg = `Prawie! W stopniu najwyższym brakuje <b>the</b>: <b>${esc(q[2][0])}</b>.`; }
+    else if (!v) { msg = `Brak odpowiedzi. Poprawnie: <b>${esc(q[2][0])}</b>.`; }
+    else if (!sup && acc.includes(v.replace(/^the /, ""))) { got += .5; cls = "mid"; msg = `Prawie! W stopniu wyższym nie piszemy <b>the</b>: <b>${esc(q[2][0])}</b>.`; }
+    else msg = `Poprawnie: <b>${esc(q[2][0])}</b>${sup ? " (stopień najwyższy – jest „the”)" : " (stopień wyższy – jest „than”)"}.`;
+    inp.classList.add(cls); inp.disabled = true; fb.className = "fb " + cls; fb.innerHTML = msg;
+  });
+  // Ćw. 2
+  S.e2.forEach((o, i) => {
+    const q = o.x, fb = $("#f2_" + i); max++;
+    const good = q[4];
+    document.querySelectorAll(`.opt[data-i="${i}"]`).forEach(b => { b.disabled = true; const k = +b.dataset.k; if (k === good) b.classList.add("ok"); else if (o.sel === k) b.classList.add("bad"); });
+    if (o.sel === good) { got++; fb.className = "fb ok"; fb.textContent = "Dobrze!"; }
+    else { fb.className = "fb bad"; fb.innerHTML = `${o.sel === null ? "Brak odpowiedzi. " : ""}Poprawnie: <b>${esc(q[1 + good])}</b>.`; }
+  });
+  // Ćw. 3
+  S.e3.forEach((q, i) => {
+    const inp = $("#e3_" + i), v = norm(inp.value), fb = $("#f3_" + i); max++;
+    const acc = q[1].map(norm);
+    let cls = "bad", msg;
+    const best = Math.min(...acc.map(a => lev(v, a)));
+    if (v && acc.includes(v)) { got++; cls = "ok"; msg = "Dobrze!"; }
+    else if (v && best <= 2) { got += .5; cls = "mid"; msg = `Prawie – sprawdź pisownię. Wzór: <b>${esc(q[1][0])}</b>`; }
+    else msg = `${v ? "" : "Brak odpowiedzi. "}Przykładowa poprawna odpowiedź: <b>${esc(q[1][0])}</b>`;
+    inp.classList.add(cls); inp.disabled = true; fb.className = "fb " + cls; fb.innerHTML = msg;
+  });
+  S.done = true;
+  const p = Math.round(got / max * 100), g = GRADES.find(x => p >= x[0]);
+  const fmt = x => Number.isInteger(x) ? x : x.toFixed(1).replace(".", ",");
+  $("#res").innerHTML = `<div class="result"><div style="font-size:36px">${g[2]}</div><div class="big">${p}%</div><div class="g">Ocena: ${g[1]}</div><div style="color:var(--mute);font-size:14px">${fmt(got)} / ${max} pkt</div></div>`;
+  const d = new Date(); const h = store.get("przym_hist", []); h.unshift({d: d.toLocaleDateString("pl-PL") + " " + d.toLocaleTimeString("pl-PL", {hour: "2-digit", minute: "2-digit"}), p, g: g[1]}); store.set("przym_hist", h.slice(0, 8));
+  renderHist();
+  $("#check").textContent = "Następny zestaw ▶";
+  $("#res").scrollIntoView({behavior: "smooth", block: "center"});
+}
+function renderHist() {
+  const h = store.get("przym_hist", []);
+  $("#hist").innerHTML = h.length ? "<b>Ostatnie wyniki:</b><br>" + h.map(x => `${esc(x.d)} – ${x.p}% (${esc(x.g)})`).join("<br>") : "";
+}
+$("#check").onclick = check;
+$("#new").onclick = () => { newSet(); window.scrollTo(0, 0); };
+newSet();
+</script>
+</body>
+</html>

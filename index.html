@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Szkolny Kącik</title>
+<meta name="description" content="Quizy i ćwiczenia do nauki w domu.">
+<meta name="theme-color" content="#2457c5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Szkolny Kącik">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;600;700&display=swap">
+<style>
+/* Layout: kartka z zeszytu w kratkę – czerwony margines, materiały jako „naklejki” na kartce */
+:root{
+  --paper:#f7f9fc; --grid:#dbe5f1; --ink:#1d2b4a; --mute:#5a6886;
+  --accent:#2457c5; --margin:#e0525a; --card:#ffffff; --line:#cfd9e8;
+  --hist:#b5782a; --histbg:#fbf1e2; --eng:#c2406a; --engbg:#fde7ee;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#141a26; --grid:#1f2a3d; --ink:#e7ecf6; --mute:#9aa7c0;
+  --accent:#7ea6ff; --margin:#ff7a80; --card:#1b2333; --line:#2d3a52;
+  --hist:#e3a95a; --histbg:#2b2416; --eng:#ff8fb2; --engbg:#3a1d29; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#141a26; --grid:#1f2a3d; --ink:#e7ecf6; --mute:#9aa7c0;
+  --accent:#7ea6ff; --margin:#ff7a80; --card:#1b2333; --line:#2d3a52;
+  --hist:#e3a95a; --histbg:#2b2416; --eng:#ff8fb2; --engbg:#3a1d29; color-scheme:dark}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px}
+.page{max-width:760px;margin:0 auto;padding-block:28px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  position:relative}
+.page::before{content:"";position:absolute;top:0;bottom:0;left:max(6px,env(safe-area-inset-left,0px));width:2px;background:var(--margin);opacity:.55}
+header h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,2.8rem);margin:0;line-height:1.05;text-wrap:balance}
+header p{margin:.4rem 0 0;color:var(--mute);font-size:1.05rem;max-width:60ch}
+.label{margin:2rem 0 .7rem;font-family:var(--display);font-weight:600;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.list{display:grid;gap:14px}
+.tile{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;text-align:left;width:100%;
+  background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:16px;padding:16px 18px;
+  font:inherit;cursor:pointer;transition:transform .15s,border-color .15s}
+.tile:hover{border-color:var(--accent);transform:translateY(-2px)}
+.tile:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.badge{width:58px;height:58px;border-radius:14px;background:var(--histbg);color:var(--hist);display:grid;place-items:center}
+.badge svg{width:34px;height:34px}
+.tile .subj{font-size:.8rem;font-weight:700;color:var(--hist);letter-spacing:.04em;text-transform:uppercase}
+.badge.eng{background:var(--engbg);color:var(--eng)}
+.tile .subj.eng{color:var(--eng)}
+.tile h2{font-family:var(--display);font-weight:800;font-size:1.4rem;margin:.1rem 0 .15rem;line-height:1.15}
+.tile .meta{font-size:.92rem;color:var(--mute)}
+.tile .go{font-family:var(--display);font-weight:800;color:var(--accent);font-size:1.05rem;white-space:nowrap}
+.note{margin-top:1.4rem;color:var(--mute);font-size:.95rem;border-left:3px solid var(--line);padding-left:12px}
+@media (max-width:480px){.tile{grid-template-columns:auto 1fr}.tile .go{grid-column:1/-1;justify-self:end}}
+/* widok materiału */
+#viewer{position:fixed;inset:0;background:var(--paper);display:flex;flex-direction:column;z-index:20}
+.bar{display:flex;align-items:center;gap:12px;background:var(--card);border-bottom:2px solid var(--line);
+  padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:8px;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.back{font:inherit;font-weight:700;color:var(--accent);background:transparent;border:2px solid var(--accent);border-radius:999px;padding:6px 14px;cursor:pointer}
+.back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bar .t{font-family:var(--display);font-weight:800;font-size:1.1rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#frame{flex:1;width:100%;border:0;background:#f4f1ea}
+.loading{padding:2rem;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
+</style>
+<style>[hidden]{display:none!important}*{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top,0px)}</style>
+</head>
+<body>
+<div class="page" id="home">
+  <header>
+    <h1>Szkolny Kącik</h1>
+    <p>Quizy i ćwiczenia do nauki w domu. Wybierz materiał i zaczynaj – wyniki zapisują się na tym urządzeniu.</p>
+  </header>
+  <div class="label">Materiały</div>
+  <div class="list" id="list"></div>
+  <p class="note">Nowe quizy i ćwiczenia będą pojawiać się na tej liście.</p>
+</div>
+
+<div id="viewer" hidden>
+  <div class="bar">
+    <button class="back" id="back" type="button">← Wróć</button>
+    <span class="t" id="vt"></span>
+  </div>
+  <iframe id="frame" title="Materiał do nauki"></iframe>
+</div>
+
+<script>
+// Lista materiałów – nowe pozycje dopisujemy na górze.
+const MATERIALS = [
+  { id: "przymiotniki", file: "przymiotniki.html", subject: "Angielski · klasa 5", title: "Stopniowanie przymiotników",
+    meta: "3 ćwiczenia jak na kartce · za każdym razem nowy zestaw ze 122 zdań", icon: "abc", tone: "eng" },
+  { id: "grecja", file: "grecja.html", subject: "Historia · klasa 5", title: "Starożytna Grecja",
+    meta: "Quiz · 478 pytań · 6 tematów, od Aten po Aleksandra Wielkiego", icon: "column", tone: "hist" }
+];
+const ICONS = {
+  abc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19V9l3-5 3 5v10M3 13h6"/><path d="M13 17l3-4 3 2 3-6"/><path d="M19 9h3v3"/></svg>',
+  column: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M5 7h14M12 3 4 7h16z"/><path d="M7 7v11M12 7v11M17 7v11"/></svg>'
+};
+const list = document.getElementById("list");
+list.innerHTML = MATERIALS.map(m => `
+  <button class="tile" type="button" data-id="${m.id}">
+    <span class="badge ${m.tone}">${ICONS[m.icon] || ""}</span>
+    <span><span class="subj ${m.tone}">${m.subject}</span><h2>${m.title}</h2><span class="meta">${m.meta}</span></span>
+    <span class="go">Otwórz →</span>
+  </button>`).join("");
+list.addEventListener("click", e => { const b = e.target.closest(".tile"); if (b) location.hash = b.dataset.id; });
+
+const home = document.getElementById("home"), viewer = document.getElementById("viewer"), frame = document.getElementById("frame");
+function show() {
+  const m = MATERIALS.find(x => x.id === location.hash.slice(1));
+  if (!m) { viewer.hidden = true; home.hidden = false; frame.removeAttribute("src"); document.title = "Szkolny Kącik"; return; }
+  home.hidden = true; viewer.hidden = false;
+  document.getElementById("vt").textContent = m.title; document.title = m.title + " · Szkolny Kącik";
+  if (frame.getAttribute("src") !== m.file) frame.src = m.file;
+}
+document.getElementById("back").onclick = () => { location.hash = ""; };
+window.addEventListener("hashchange", show);
+show();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
