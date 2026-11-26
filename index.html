@@ -18,18 +18,18 @@
 :root{
   --paper:#f7f9fc; --grid:#dbe5f1; --ink:#1d2b4a; --mute:#5a6886;
   --accent:#2457c5; --margin:#e0525a; --card:#ffffff; --line:#cfd9e8;
-  --hist:#b5782a; --histbg:#fbf1e2; --eng:#c2406a; --engbg:#fde7ee;
+  --hist:#b5782a; --histbg:#fbf1e2; --eng:#c2406a; --engbg:#fde7ee; --math:#2f7d4f; --mathbg:#e3f3e8;
   --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
   --body:"Nunito","Segoe UI",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#141a26; --grid:#1f2a3d; --ink:#e7ecf6; --mute:#9aa7c0;
   --accent:#7ea6ff; --margin:#ff7a80; --card:#1b2333; --line:#2d3a52;
-  --hist:#e3a95a; --histbg:#2b2416; --eng:#ff8fb2; --engbg:#3a1d29; color-scheme:dark}}
+  --hist:#e3a95a; --histbg:#2b2416; --eng:#ff8fb2; --engbg:#3a1d29; --math:#7fd3a0; --mathbg:#1d3326; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#141a26; --grid:#1f2a3d; --ink:#e7ecf6; --mute:#9aa7c0;
   --accent:#7ea6ff; --margin:#ff7a80; --card:#1b2333; --line:#2d3a52;
-  --hist:#e3a95a; --histbg:#2b2416; --eng:#ff8fb2; --engbg:#3a1d29; color-scheme:dark}
+  --hist:#e3a95a; --histbg:#2b2416; --eng:#ff8fb2; --engbg:#3a1d29; --math:#7fd3a0; --mathbg:#1d3326; color-scheme:dark}
 html,body{height:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
@@ -52,6 +52,8 @@ header p{margin:.4rem 0 0;color:var(--mute);font-size:1.05rem;max-width:60ch}
 .tile .subj{font-size:.8rem;font-weight:700;color:var(--hist);letter-spacing:.04em;text-transform:uppercase}
 .badge.eng{background:var(--engbg);color:var(--eng)}
 .tile .subj.eng{color:var(--eng)}
+.badge.math{background:var(--mathbg);color:var(--math)}
+.tile .subj.math{color:var(--math)}
 .tile h2{font-family:var(--display);font-weight:800;font-size:1.4rem;margin:.1rem 0 .15rem;line-height:1.15}
 .tile .meta{font-size:.92rem;color:var(--mute)}
 .tile .go{font-family:var(--display);font-weight:800;color:var(--accent);font-size:1.05rem;white-space:nowrap}
@@ -93,12 +95,15 @@ header p{margin:.4rem 0 0;color:var(--mute);font-size:1.05rem;max-width:60ch}
 <script>
 // Lista materiałów – nowe pozycje dopisujemy na górze.
 const MATERIALS = [
+  { id: "skala", file: "skala.html", subject: "Matematyka · klasa 5", title: "Skala i plan",
+    meta: "Mapy, plany i powiększenia · 3 poziomy · liczby losują się za każdym razem", icon: "ruler", tone: "math" },
   { id: "przymiotniki", file: "przymiotniki.html", subject: "Angielski · klasa 5", title: "Stopniowanie przymiotników",
     meta: "3 ćwiczenia jak na kartce · za każdym razem nowy zestaw ze 122 zdań", icon: "abc", tone: "eng" },
   { id: "grecja", file: "grecja.html", subject: "Historia · klasa 5", title: "Starożytna Grecja",
     meta: "Quiz · 478 pytań · 6 tematów, od Aten po Aleksandra Wielkiego", icon: "column", tone: "hist" }
 ];
 const ICONS = {
+  ruler: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/></svg>',
   abc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19V9l3-5 3 5v10M3 13h6"/><path d="M13 17l3-4 3 2 3-6"/><path d="M19 9h3v3"/></svg>',
   column: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M5 7h14M12 3 4 7h16z"/><path d="M7 7v11M12 7v11M17 7v11"/></svg>'
 };

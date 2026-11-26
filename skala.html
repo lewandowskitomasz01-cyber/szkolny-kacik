@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skala i plan</title>
+<style>
+:root{--paper:#fbfdf8;--grid:#e1ecdc;--ink:#1f2a24;--mute:#5d6b63;--green:#2f7d4f;--greenbg:#e3f3e8;--greenink:#1d4d31;
+  --yellow:#fdf0c4;--line:#cfdcd2;--ok:#2e8b57;--okbg:#e4f4ea;--bad:#c0392b;--badbg:#fbe9e7;--mid:#a86e00;--midbg:#fff4d6;--blue:#2457c5}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,"DejaVu Sans",sans-serif;font-size:17px;
+  background:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px}
+header{background:var(--green);color:#fff;padding:16px 16px 14px;text-align:center}
+header h1{margin:0;font-size:clamp(21px,5vw,28px)}
+header p{margin:4px 0 0;opacity:.9;font-size:14px}
+main{max-width:720px;margin:0 auto;padding:14px 16px 40px}
+.card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{margin:0 0 10px;font-size:19px;color:var(--greenink)}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font:inherit;font-size:15px;border:2px solid var(--green);background:#fff;color:var(--green);border-radius:999px;padding:7px 15px;cursor:pointer;font-weight:700}
+.pill.on{background:var(--green);color:#fff}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer}
+.opt input{width:20px;height:20px;margin-top:2px;accent-color:var(--green)}
+.small{color:var(--mute);font-size:14px}
+.btn{font:inherit;font-weight:800;border:0;border-radius:12px;padding:13px 24px;cursor:pointer;background:var(--green);color:#fff;font-size:17px}
+.btn.sec{background:#fff;color:var(--green);border:2px solid var(--green)}
+.btn:focus-visible,.pill:focus-visible,.choice:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}
+.top{display:flex;justify-content:space-between;font-size:14px;color:var(--mute);margin-bottom:6px}
+.bar{height:8px;background:#e4ece6;border-radius:99px;overflow:hidden;margin-bottom:12px}.bar div{height:100%;background:var(--green)}
+.tag{display:inline-block;background:var(--greenbg);color:var(--greenink);font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;margin-bottom:8px}
+.q{font-size:18px;line-height:1.5;margin-bottom:12px}
+.q b{white-space:nowrap}
+.ans{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:8px 0}
+.ans label{display:flex;align-items:center;gap:8px;font-weight:600}
+.ans input{font:inherit;font-size:18px;width:130px;padding:7px 10px;border:2px solid var(--line);border-radius:10px;text-align:right}
+.ans input:focus{outline:none;border-color:var(--green)}
+.ans input.ok{border-color:var(--ok);background:var(--okbg)} .ans input.bad{border-color:var(--bad);background:var(--badbg)}
+.choices{display:grid;gap:8px}
+.choice{font:inherit;text-align:left;border:2px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;color:var(--ink)}
+.choice.sel{border-color:var(--green);background:var(--greenbg)}
+.choice.ok{border-color:var(--ok);background:var(--okbg)} .choice.bad{border-color:var(--bad);background:var(--badbg)}
+.fb{border-radius:10px;padding:10px 14px;margin-top:12px;line-height:1.5;font-size:16px}
+.fb.ok{background:var(--okbg);color:#1d5a37} .fb.bad{background:var(--badbg);color:#8a2a1f} .fb.mid{background:var(--midbg);color:#6a4500}
+.steps{margin:8px 0 0;padding-left:20px}.steps li{margin:3px 0}
+.pic{margin:4px 0 12px;max-width:100%}
+.pic svg{max-width:100%;height:auto;display:block}
+.remember{background:var(--yellow);border-radius:12px;padding:12px 16px;font-size:15px;line-height:1.6;margin-bottom:14px}
+.remember b.h{color:#7a5300;font-size:17px}
+.big{font-size:46px;font-weight:900;color:var(--greenink)}
+.rev{border-top:1px solid var(--line);padding:10px 0}
+.rev .c{color:var(--ok)}.rev .y{color:var(--bad)}
+.hist{font-size:14px;color:var(--mute)}
+</style>
+</head>
+<body>
+<header><h1>📏 Skala i plan</h1><p>Matematyka · klasa 5 · liczby losują się za każdym razem</p></header>
+<main id="app"></main>
+<script>
+// ===================== POMOCNICZE =====================
+const $ = s => document.querySelector(s);
+const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const NB = " ";
+// liczba po polsku: spacje w tysiącach, przecinek dziesiętny
+function pl(x) {
+  x = Math.round(x * 1e6) / 1e6;
+  let [i, d] = String(Math.abs(x)).split(".");
+  if (i.length > 4) i = i.replace(/\B(?=(\d{3})+(?!\d))/g, NB);
+  return (x < 0 ? "−" : "") + i + (d ? "," + d : "");
+}
+const scaleTxt = n => `1${NB}:${NB}${pl(n)}`;
+function parseNum(s) {
+  s = String(s).trim().replace(/\s| /g, "").replace(",", ".");
+  if (!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+const same = (a, b) => Math.abs(a - b) < 1e-6;
+const UNIT = { km: 100000, m: 100, cm: 1, mm: 0.1 };      // ile cm w jednostce
+const toUnit = (cm, u) => Math.round(cm / UNIT[u] * 1e6) / 1e6;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+// zamiana cm -> jednostka w krokach rozwiązania
+function convStep(cm, u) {
+  if (u === "cm") return "";
+  if (u === "m") return `${pl(cm)} cm = ${pl(toUnit(cm, "m"))} m (1 m = 100 cm, więc dzielimy przez 100)`;
+  if (u === "km") return `${pl(cm)} cm = ${pl(toUnit(cm, "km"))} km (1 km = 100${NB}000 cm, więc dzielimy przez 100${NB}000)`;
+  if (u === "mm") return `${pl(cm)} cm = ${pl(toUnit(cm, "mm"))} mm`;
+}
+// najlepsza jednostka dla odległości w terenie
+const realUnit = cm => (cm >= 100000 ? "km" : "m");
+
+// ===================== DANE DO TREŚCI =====================
+const PLACES = ["Dębowo", "Lipki", "Zalesie", "Brzozów", "Kamionka", "Olszyny", "Stawki", "Górki", "Jabłonna", "Wierzbica", "Modrzew", "Sosnówka"];
+const KIDS = [["Ola","zmierzyła"],["Zosia","zmierzyła"],["Kuba","zmierzył"],["Antek","zmierzył"],["Maja","zmierzyła"],["Lena","zmierzyła"],["Staś","zmierzył"],["Hania","zmierzyła"],["Franek","zmierzył"],["Julka","zmierzyła"]];
+const PAIR = () => { const [a, b] = shuffle(PLACES); return [a, b]; };
+const BUGS = [["mrówka", 6], ["biedronka", 8], ["mucha", 7], ["pszczoła", 14], ["osa", 18], ["chrabąszcz", 25], ["konik polny", 30], ["pchła", 2], ["komar", 5], ["ziarnko ryżu", 6]];
+const ROOMS = ["pokój", "kuchnia", "łazienka", "przedpokój", "pokój Oli", "salon", "klasa", "garaż"];
+const ITEMS = [["łóżko", 200], ["biurko", 120], ["szafa", 150], ["stół", 160], ["kanapa", 220], ["dywan", 250], ["regał", 90], ["wanna", 170]];
+
+const MAP_SCALES = {
+  1: [100, 200, 500, 1000, 2000, 5000],
+  2: [10000, 20000, 25000, 50000, 100000],
+  3: [20000, 25000, 50000, 100000, 200000, 250000, 500000, 1000000]
+};
+const PLAN_SCALES = { 1: [50, 100], 2: [20, 25, 50, 100], 3: [20, 25, 50, 100, 200] };
+
+// ===================== OBRAZKI =====================
+function mapSvg(d, label, scaleN) {
+  const x1 = 50, x2 = 270;
+  return `<div class="pic"><svg viewBox="0 0 320 130" width="320" role="img" aria-label="Mapa z odcinkiem ${label}">
+  <rect x="2" y="2" width="316" height="126" rx="10" fill="#eef6e8" stroke="#9cbf94" stroke-width="2"/>
+  <path d="M10 100 C60 80 90 115 150 95 S250 70 310 90" fill="none" stroke="#8ec5e8" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="230" cy="35" r="14" fill="#b8d9a8"/><circle cx="250" cy="42" r="11" fill="#a6cf93"/><circle cx="85" cy="30" r="10" fill="#b8d9a8"/>
+  <line x1="${x1}" y1="62" x2="${x2}" y2="62" stroke="#c0392b" stroke-width="3" stroke-dasharray="8 6"/>
+  <circle cx="${x1}" cy="62" r="7" fill="#1f2a24"/><circle cx="${x2}" cy="62" r="7" fill="#1f2a24"/>
+  <text x="${x1}" y="88" font-size="14" text-anchor="middle" fill="#1f2a24" font-family="sans-serif">${d[0]}</text>
+  <text x="${x2}" y="88" font-size="14" text-anchor="middle" fill="#1f2a24" font-family="sans-serif">${d[1]}</text>
+  <rect x="${(x1 + x2) / 2 - 40}" y="40" width="80" height="20" rx="5" fill="#fff"/>
+  <text x="${(x1 + x2) / 2}" y="55" font-size="15" font-weight="bold" text-anchor="middle" fill="#c0392b" font-family="sans-serif">${label}</text>
+  ${scaleN ? `<text x="310" y="122" font-size="12" text-anchor="end" fill="#3b5b3f" font-family="sans-serif">skala ${scaleTxt(scaleN)}</text>` : ""}
+  </svg></div>`;
+}
+function roomSvg(name, wLabel, hLabel, ratio) {
+  const W = 220, H = Math.max(80, Math.min(170, Math.round(220 * ratio)));
+  return `<div class="pic"><svg viewBox="0 0 320 ${H + 50}" width="320" role="img" aria-label="Plan: ${name}">
+  <rect x="50" y="15" width="${W}" height="${H}" fill="#fff" stroke="#1f2a24" stroke-width="4"/>
+  <line x1="50" y1="15" x2="50" y2="${15 + H}" stroke="#1f2a24" stroke-width="4"/>
+  <path d="M${50 + W - 60} ${15 + H} a40 40 0 0 1 40 -40" fill="none" stroke="#999" stroke-width="1.5"/>
+  <text x="${50 + W / 2}" y="${15 + H / 2 + 5}" font-size="15" text-anchor="middle" fill="#5d6b63" font-family="sans-serif">${name}</text>
+  <text x="${50 + W / 2}" y="${H + 40}" font-size="14" text-anchor="middle" fill="#2f7d4f" font-weight="bold" font-family="sans-serif">${wLabel}</text>
+  <text x="38" y="${15 + H / 2}" font-size="14" text-anchor="end" fill="#2f7d4f" font-weight="bold" font-family="sans-serif" dominant-baseline="middle">${hLabel}</text>
+  </svg></div>`;
+}
+
+// ===================== GENERATORY =====================
+// Każdy zwraca: { cat, tag, q (html), pic?, inputs:[{label, unit, ans}] | choices+correct, steps:[...] }
+const GEN = {
+  // 1 cm na mapie to ile w terenie
+  jednostka(lv) {
+    const n = pick(MAP_SCALES[lv]); const u = realUnit(n);
+    return { cat: "zapis", tag: "Co oznacza skala?",
+      q: `Mapa ma skalę <b>${scaleTxt(n)}</b>. Jaką odległość w terenie oznacza <b>1 cm</b> na tej mapie?`,
+      inputs: [{ label: "1 cm na mapie to", unit: u, ans: toUnit(n, u) }],
+      steps: [`Skala ${scaleTxt(n)} znaczy: 1 cm na mapie to ${pl(n)} cm w terenie.`, convStep(n, u)] };
+  },
+  // odległość w terenie z mapy
+  teren(lv) {
+    const n = pick(MAP_SCALES[lv]);
+    let d, dTxt, dCm;
+    if (lv === 3 && Math.random() < .5) { if (Math.random() < .5) { d = R(2, 9) + .5; dTxt = `${pl(d)} cm`; dCm = d; } else { const mm = R(3, 19) * 5; dTxt = `${mm} mm`; dCm = mm / 10; } }
+    else { d = lv === 1 ? R(2, 9) : R(2, 12); dTxt = `${d} cm`; dCm = d; }
+    const realCm = dCm * n; const u = realUnit(realCm);
+    const [A, B] = PAIR(); const kid = pick(KIDS);
+    const q = pick([
+      `Na mapie w skali <b>${scaleTxt(n)}</b> odległość między miejscowościami ${A} i ${B} wynosi <b>${dTxt}</b>. Jaka jest ta odległość w rzeczywistości?`,
+      `${kid[0]} ${kid[1]} na mapie w skali <b>${scaleTxt(n)}</b> trasę wycieczki: <b>${dTxt}</b>. Ile wynosi ta trasa naprawdę?`,
+      `Na planie w skali <b>${scaleTxt(n)}</b> droga od domu do szkoły ma <b>${dTxt}</b>. Jak długa jest ta droga w rzeczywistości?`
+    ]);
+    const steps = [];
+    if (dTxt.endsWith("mm")) steps.push(`Najpierw zamieniamy: ${dTxt} = ${pl(dCm)} cm.`);
+    steps.push(`1 cm na mapie to ${pl(n)} cm w terenie, więc ${pl(dCm)} cm to ${pl(dCm)} · ${pl(n)} = ${pl(realCm)} cm.`);
+    steps.push(convStep(realCm, u));
+    return { cat: "mapa", tag: "Odległość w terenie", q, pic: mapSvg([A, B], dTxt, n),
+      inputs: [{ label: "W rzeczywistości", unit: u, ans: toUnit(realCm, u) }], steps };
+  },
+  // odległość na mapie z terenu
+  mapa(lv) {
+    const n = pick(MAP_SCALES[lv]);
+    const half = lv === 3 && Math.random() < .5;
+    const d = half ? R(1, 9) + .5 : (lv === 1 ? R(2, 9) : R(2, 15));
+    const realCm = d * n; const u = realUnit(realCm); const realTxt = `${pl(toUnit(realCm, u))} ${u}`;
+    const [A, B] = PAIR();
+    const askMm = lv === 3 && !half && Math.random() < .3;
+    const q = pick([
+      `Odległość między ${A} a ${B} w rzeczywistości wynosi <b>${realTxt}</b>. Ile centymetrów będzie miała na mapie w skali <b>${scaleTxt(n)}</b>?`,
+      `Ścieżka rowerowa ma długość <b>${realTxt}</b>. Jaką długość będzie miała na mapie w skali <b>${scaleTxt(n)}</b>?`,
+      `Most ma w rzeczywistości <b>${realTxt}</b> długości. Ile będzie miał na mapie w skali <b>${scaleTxt(n)}</b>?`
+    ]);
+    const steps = [];
+    if (u !== "cm") steps.push(`Zamieniamy na centymetry: ${realTxt} = ${pl(realCm)} cm.`);
+    steps.push(`Każde ${pl(n)} cm w terenie to 1 cm na mapie, więc dzielimy: ${pl(realCm)} : ${pl(n)} = ${pl(d)} cm.`);
+    if (askMm) steps.push(`${pl(d)} cm = ${pl(d * 10)} mm.`);
+    return { cat: "mapa", tag: "Odległość na mapie", q: q + (askMm ? " Podaj wynik w milimetrach." : ""), pic: mapSvg([A, B], "? cm", n),
+      inputs: [{ label: "Na mapie", unit: askMm ? "mm" : "cm", ans: askMm ? d * 10 : d }], steps };
+  },
+  // jaka to skala
+  jakaSkala(lv) {
+    const n = pick(MAP_SCALES[lv]); const d = lv === 1 ? R(2, 6) : R(2, 10);
+    const realCm = d * n; const u = realUnit(realCm); const realTxt = `${pl(toUnit(realCm, u))} ${u}`;
+    return { cat: "zapis", tag: "Wyznacz skalę",
+      q: `Odcinek o długości <b>${d} cm</b> na mapie oznacza <b>${realTxt}</b> w terenie. W jakiej skali jest ta mapa?`,
+      inputs: [{ label: "Skala 1 :", unit: "", ans: n }],
+      steps: [`Zamieniamy na centymetry: ${realTxt} = ${pl(realCm)} cm.`, `${d} cm na mapie to ${pl(realCm)} cm w terenie, więc 1 cm to ${pl(realCm)} : ${d} = ${pl(n)} cm.`, `Skala: ${scaleTxt(n)}.`] };
+  },
+  // skala mianowana <-> liczbowa
+  mianowana(lv) {
+    const n = pick(MAP_SCALES[lv]); const u = realUnit(n); const v = toUnit(n, u);
+    if (Math.random() < .5) {
+      return { cat: "zapis", tag: "Zamień zapis skali",
+        q: `Na mapie napisano: <b>1 cm – ${pl(v)} ${u}</b>. Zapisz tę skalę liczbowo.`,
+        inputs: [{ label: "Skala 1 :", unit: "", ans: n }],
+        steps: [`${pl(v)} ${u} = ${pl(n)} cm.`, `1 cm na mapie to ${pl(n)} cm w terenie, więc skala to ${scaleTxt(n)}.`] };
+    }
+    return { cat: "zapis", tag: "Zamień zapis skali",
+      q: `Zapisz skalę <b>${scaleTxt(n)}</b> w postaci „1 cm – … ${u}”.`,
+      inputs: [{ label: "1 cm –", unit: u, ans: v }],
+      steps: [`1 cm na mapie to ${pl(n)} cm w terenie.`, convStep(n, u)] };
+  },
+  // plan pokoju
+  plan(lv) {
+    const k = pick(PLAN_SCALES[lv]); const name = pick(ROOMS);
+    // wymiary tak, by wynik był liczbą całkowitą (lub ,5 na poziomie 3)
+    const step = lv === 3 ? k / 2 : k;  // w cm
+    let a, b; do { a = R(2, 9) * 100 + (lv >= 2 ? pick([0, 0, 50]) : 0); b = R(2, 7) * 100 + (lv >= 2 ? pick([0, 0, 50]) : 0); } while (a % step || b % step || a === b);
+    if (a < b) [a, b] = [b, a];
+    const pa = a / k, pb = b / k;
+    if (lv === 3 && Math.random() < .5) {
+      return { cat: "plan", tag: "Plan mieszkania", pic: roomSvg(name, `${pl(pa)} cm`, `${pl(pb)} cm`, b / a),
+        q: `Na planie w skali <b>${scaleTxt(k)}</b> ${name} ma wymiary <b>${pl(pa)} cm</b> na <b>${pl(pb)} cm</b>. Jakie są prawdziwe wymiary?`,
+        inputs: [{ label: "Długość", unit: "m", ans: a / 100 }, { label: "Szerokość", unit: "m", ans: b / 100 }],
+        steps: [`Mnożymy przez ${k}: ${pl(pa)} · ${k} = ${pl(a)} cm = ${pl(a / 100)} m.`, `${pl(pb)} · ${k} = ${pl(b)} cm = ${pl(b / 100)} m.`] };
+    }
+    return { cat: "plan", tag: "Plan mieszkania", pic: roomSvg(name, `${pl(a / 100)} m`, `${pl(b / 100)} m`, b / a),
+      q: `${name[0].toUpperCase() + name.slice(1)} ma wymiary <b>${pl(a / 100)} m</b> na <b>${pl(b / 100)} m</b>. Jakie wymiary będzie mieć na planie w skali <b>${scaleTxt(k)}</b>?`,
+      inputs: [{ label: "Długość", unit: "cm", ans: pa }, { label: "Szerokość", unit: "cm", ans: pb }],
+      steps: [`Zamieniamy na centymetry: ${pl(a / 100)} m = ${pl(a)} cm, ${pl(b / 100)} m = ${pl(b)} cm.`, `Skala ${scaleTxt(k)}: dzielimy przez ${k}.`, `${pl(a)} : ${k} = ${pl(pa)} cm, ${pl(b)} : ${k} = ${pl(pb)} cm.`] };
+  },
+  // mebel na planie
+  mebel(lv) {
+    const k = pick(PLAN_SCALES[Math.min(lv, 2)]); let [it, L] = pick(ITEMS);
+    while (L % k && lv < 3) { [it, L] = pick(ITEMS); }
+    const p = L / k;
+    if (Math.random() < .5) return { cat: "plan", tag: "Plan mieszkania",
+      q: `${it[0].toUpperCase() + it.slice(1)} ma długość <b>${pl(L / 100)} m</b>. Jaką długość będzie mieć na planie w skali <b>${scaleTxt(k)}</b>?`,
+      inputs: [{ label: "Na planie", unit: "cm", ans: p }],
+      steps: [`${pl(L / 100)} m = ${L} cm.`, `${L} : ${k} = ${pl(p)} cm.`] };
+    return { cat: "plan", tag: "Plan mieszkania",
+      q: `Na planie w skali <b>${scaleTxt(k)}</b> ${it} ma długość <b>${pl(p)} cm</b>. Jaka jest jego prawdziwa długość w centymetrach?`,
+      inputs: [{ label: "Naprawdę", unit: "cm", ans: L }],
+      steps: [`Skala ${scaleTxt(k)}: 1 cm na planie to ${k} cm naprawdę.`, `${pl(p)} · ${k} = ${L} cm (czyli ${pl(L / 100)} m).`] };
+  },
+  // powiększenie k:1
+  powiekszenie(lv) {
+    const k = pick(lv === 1 ? [2, 3, 5, 10] : [2, 3, 4, 5, 10]); const [bug, mm] = pick(BUGS);
+    const big = k * mm;
+    if (lv === 1 || Math.random() < .5) return { cat: "powiekszenie", tag: "Powiększenie",
+      q: `${bug[0].toUpperCase() + bug.slice(1)} ma długość <b>${mm} mm</b>. Narysowano ją w skali <b>${k}${NB}:${NB}1</b>. Jaką długość ma na rysunku?`,
+      inputs: [{ label: "Na rysunku", unit: "mm", ans: big }],
+      steps: [`Skala ${k} : 1 oznacza, że rysunek jest ${k} razy WIĘKSZY niż w rzeczywistości.`, `${mm} · ${k} = ${big} mm${big >= 10 ? ` (czyli ${pl(big / 10)} cm)` : ""}.`] };
+    const unitCm = big % 10 === 0 && Math.random() < .5;
+    return { cat: "powiekszenie", tag: "Powiększenie",
+      q: `Na rysunku w skali <b>${k}${NB}:${NB}1</b> ${bug} ma długość <b>${unitCm ? pl(big / 10) + " cm" : big + " mm"}</b>. Jaka jest jej prawdziwa długość?`,
+      inputs: [{ label: "Naprawdę", unit: "mm", ans: mm }],
+      steps: [unitCm ? `${pl(big / 10)} cm = ${big} mm.` : "", `Rysunek jest ${k} razy większy, więc dzielimy: ${big} : ${k} = ${mm} mm.`] };
+  },
+  // pytania z wyborem
+  wybor(lv) {
+    const t = R(1, 4);
+    if (t <= 2) {
+      const sc = shuffle(MAP_SCALES[Math.max(2, lv)]).slice(0, 3);
+      const mostDetail = Math.min(...sc), biggestDist = Math.max(...sc);
+      const want = t === 1 ? mostDetail : biggestDist;
+      return { cat: "wybor", tag: "Wybierz odpowiedź",
+        q: t === 1 ? "Która mapa jest <b>najdokładniejsza</b> (widać na niej najwięcej szczegółów)?" : "Na której mapie <b>1 cm oznacza największą odległość</b> w terenie?",
+        choices: sc.map(scaleTxt), correct: sc.indexOf(want),
+        steps: t === 1 ? [`Im mniejsza liczba po dwukropku, tym mniejsza odległość mieści się w 1 cm, więc mapa jest dokładniejsza. Najdokładniejsza: ${scaleTxt(want)}.`]
+                       : [`Im większa liczba po dwukropku, tym większą odległość oznacza 1 cm. Największa: ${scaleTxt(want)}.`] };
+    }
+    if (t === 3) {
+      const k = pick([2, 3, 4, 5, 10]);
+      const opts = [`rysunek jest ${k} razy większy niż przedmiot`, `rysunek jest ${k} razy mniejszy niż przedmiot`, `rysunek ma taką samą wielkość jak przedmiot`, `1 cm na rysunku to ${k} m w rzeczywistości`];
+      return { cat: "wybor", tag: "Wybierz odpowiedź", q: `Skala <b>${k}${NB}:${NB}1</b> oznacza, że…`, choices: opts, correct: 0,
+        steps: [`Pierwsza liczba dotyczy rysunku, druga rzeczywistości. ${k} : 1 – na rysunku ${k} razy więcej, czyli powiększenie.`] };
+    }
+    const n = pick(MAP_SCALES[Math.max(2, lv)]); const u = realUnit(n); const v = toUnit(n, u);
+    const wrong = shuffle([`1 cm – ${pl(v * 10)} ${u}`, `1 cm – ${pl(v / 10)} ${u}`, `1 m – ${pl(v)} ${u}`]).slice(0, 2);
+    const ch = shuffle([`1 cm – ${pl(v)} ${u}`, ...wrong]);
+    return { cat: "wybor", tag: "Wybierz odpowiedź", q: `Który zapis oznacza to samo co skala <b>${scaleTxt(n)}</b>?`, choices: ch, correct: ch.indexOf(`1 cm – ${pl(v)} ${u}`),
+      steps: [`1 cm na mapie to ${pl(n)} cm w terenie.`, convStep(n, u)] };
+  },
+  // zadanie dwuetapowe
+  dwaKroki(lv) {
+    const n = pick(MAP_SCALES[Math.max(2, lv)]); const d1 = R(2, 6); let d2; do { d2 = R(2, 12); } while (d2 === d1);
+    const r1 = d1 * n, r2 = d2 * n; const u1 = realUnit(r1), u2 = realUnit(r2);
+    return { cat: "mapa", tag: "Zadanie dwuetapowe",
+      q: `Na mapie odcinek <b>${d1} cm</b> oznacza <b>${pl(toUnit(r1, u1))} ${u1}</b> w terenie. a) W jakiej skali jest mapa? b) Jaką odległość w terenie oznacza na tej mapie <b>${d2} cm</b>?`,
+      inputs: [{ label: "a) Skala 1 :", unit: "", ans: n }, { label: "b)", unit: u2, ans: toUnit(r2, u2) }],
+      steps: [`a) ${pl(toUnit(r1, u1))} ${u1} = ${pl(r1)} cm; ${pl(r1)} : ${d1} = ${pl(n)}, więc skala ${scaleTxt(n)}.`, `b) ${d2} · ${pl(n)} = ${pl(r2)} cm. ${convStep(r2, u2)}`] };
+  }
+};
+const CATS = {
+  mapa: { name: "Odległości na mapie", gens: ["teren", "mapa", "dwaKroki"] },
+  zapis: { name: "Zapis skali", gens: ["jednostka", "jakaSkala", "mianowana"] },
+  plan: { name: "Plan mieszkania", gens: ["plan", "mebel"] },
+  powiekszenie: { name: "Powiększenia (np. 3 : 1)", gens: ["powiekszenie"] },
+  wybor: { name: "Pytania z wyborem", gens: ["wybor"] }
+};
+const LEVELS = { 1: "łatwy", 2: "średni", 3: "trudny" };
+const NOT_EASY = ["dwaKroki"];
+
+// ===================== STAN =====================
+let cfg = store.get("skala_cfg", { lv: 1, count: 10, cats: Object.keys(CATS) });
+let ST = null, cur = null;
+
+function build() {
+  let gens = cfg.cats.flatMap(c => CATS[c].gens);
+  if (cfg.lv === 1) gens = gens.filter(g => !NOT_EASY.includes(g));
+  const qs = []; let bag = [];
+  const seen = new Set();
+  while (qs.length < cfg.count) {
+    if (!bag.length) bag = shuffle(gens);
+    const g = bag.pop(); const q = GEN[g](cfg.lv);
+    const key = q.q; if (seen.has(key)) continue; seen.add(key);
+    qs.push(q);
+  }
+  return qs;
+}
+
+// ===================== EKRANY =====================
+function start() {
+  cur = null;
+  const hist = store.get("skala_hist", []);
+  $("#app").innerHTML = `
+  <div class="remember"><b class="h">Pamiętaj!</b><br>
+    <b>Skala 1 : 50 000</b> – 1 cm na mapie to 50 000 cm w terenie (czyli 500 m).<br>
+    <b>Skala 3 : 1</b> – powiększenie: rysunek 3 razy większy niż przedmiot.<br>
+    1 km = 1000 m = 100 000 cm · 1 m = 100 cm · 1 cm = 10 mm<br>
+    Z mapy na teren – <b>mnożymy</b>. Z terenu na mapę – <b>dzielimy</b>.
+  </div>
+  <div class="card"><h2>1. Poziom</h2>
+    <div class="row" id="lv">${Object.entries(LEVELS).map(([k, v]) => `<button class="pill ${cfg.lv == k ? "on" : ""}" data-v="${k}" type="button">${v}</button>`).join("")}</div>
+    <p class="small" style="margin:8px 0 0">${cfg.lv == 1 ? "Proste skale i liczby całkowite." : cfg.lv == 2 ? "Mapy w skalach do 1 : 100 000, więcej przeliczania jednostek." : "Ułamki (np. 3,5 cm), milimetry, duże skale i zadania dwuetapowe."}</p>
+  </div>
+  <div class="card"><h2>2. Rodzaje zadań</h2>
+    ${Object.entries(CATS).map(([k, c]) => `<label class="opt"><input type="checkbox" class="ct" value="${k}" ${cfg.cats.includes(k) ? "checked" : ""}><span>${c.name}</span></label>`).join("")}
+  </div>
+  <div class="card"><h2>3. Ile zadań?</h2>
+    <div class="row" id="cnt">${[5, 10, 15, 20].map(n => `<button class="pill ${cfg.count === n ? "on" : ""}" data-n="${n}" type="button">${n}</button>`).join("")}</div>
+  </div>
+  <div id="warn"></div>
+  <div class="actions" style="justify-content:center"><button class="btn" id="go" type="button" style="font-size:19px;padding:14px 40px">Zaczynamy! ▶</button></div>
+  ${hist.length ? `<div class="card hist"><b>Ostatnie wyniki</b><br>${hist.map(h => `${h.d} – ${h.p}% (${h.g}), poziom ${h.l}`).join("<br>")}</div>` : ""}`;
+  const saveCats = () => { cfg.cats = [...document.querySelectorAll(".ct")].filter(c => c.checked).map(c => c.value); };
+  document.querySelectorAll("#lv .pill").forEach(b => b.onclick = () => { saveCats(); cfg.lv = +b.dataset.v; store.set("skala_cfg", cfg); start(); });
+  document.querySelectorAll("#cnt .pill").forEach(b => b.onclick = () => { saveCats(); cfg.count = +b.dataset.n; store.set("skala_cfg", cfg); start(); });
+  $("#go").onclick = () => {
+    saveCats();
+    if (!cfg.cats.length) { $("#warn").innerHTML = `<div class="fb mid">Zaznacz przynajmniej jeden rodzaj zadań.</div>`; return; }
+    store.set("skala_cfg", cfg); begin(build());
+  };
+}
+function begin(qs) { ST = { qs, i: 0, got: 0, log: [] }; show(); }
+
+function show() {
+  const q = ST.qs[ST.i]; cur = { q, done: false, sel: null };
+  let body;
+  if (q.choices) body = `<div class="choices">${q.choices.map((c, i) => `<button class="choice" data-i="${i}" type="button">${String.fromCharCode(65 + i)}. ${c}</button>`).join("")}</div>`;
+  else body = `<div class="ans">${q.inputs.map((inp, i) => `<label>${inp.label} <input type="text" inputmode="decimal" id="in${i}" autocomplete="off"> ${inp.unit}</label>`).join("")}</div>
+    <div class="small">Liczby dziesiętne pisz z przecinkiem, np. 2,5.</div>`;
+  $("#app").innerHTML = `
+  <div class="top"><span>Zadanie ${ST.i + 1} z ${ST.qs.length} · poziom ${LEVELS[cfg.lv]}</span><span>Punkty: <b>${fmt(ST.got)}</b></span></div>
+  <div class="bar"><div style="width:${Math.round(ST.i / ST.qs.length * 100)}%"></div></div>
+  <div class="card">
+    <span class="tag">${q.tag}</span>
+    <div class="q">${q.q}</div>
+    ${q.pic || ""}
+    ${body}
+    <div id="fb"></div>
+    <div class="actions"><button class="btn sec" id="quit" type="button">Zakończ</button><button class="btn" id="chk" type="button">Sprawdź</button></div>
+  </div>`;
+  if (q.choices) document.querySelectorAll(".choice").forEach(b => b.onclick = () => { if (cur.done) return; document.querySelectorAll(".choice").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); cur.sel = +b.dataset.i; });
+  const first = $("#in0"); if (first) first.focus();
+  document.querySelectorAll(".ans input").forEach(inp => inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("#chk").click(); } }));
+  $("#chk").onclick = check;
+  $("#quit").onclick = () => ST.log.length ? results() : start();
+}
+const fmt = x => Number.isInteger(x) ? x : x.toFixed(1).replace(".", ",");
+const PRAISE = ["Brawo!", "Świetnie!", "Dokładnie tak!", "Super!", "Doskonale!", "Tak jest!"];
+function check() {
+  if (cur.done) { ST.i++; return ST.i >= ST.qs.length ? results() : show(); }
+  const q = cur.q; let score = 0, yours, correct;
+  if (q.choices) {
+    if (cur.sel === null) return hint("Wybierz odpowiedź.");
+    score = cur.sel === q.correct ? 1 : 0;
+    document.querySelectorAll(".choice").forEach(b => { b.disabled = true; const i = +b.dataset.i; if (i === q.correct) b.classList.add("ok"); else if (i === cur.sel) b.classList.add("bad"); });
+    yours = q.choices[cur.sel]; correct = q.choices[q.correct];
+  } else {
+    const vals = q.inputs.map((_, i) => $("#in" + i).value);
+    if (vals.some(v => !v.trim())) return hint("Wpisz odpowiedź" + (q.inputs.length > 1 ? " we wszystkie pola." : "."));
+    const nums = vals.map(parseNum);
+    if (nums.some(isNaN)) return hint("Wpisz samą liczbę, bez jednostki (np. 2,5).");
+    let good = 0;
+    q.inputs.forEach((inp, i) => { const ok = same(nums[i], inp.ans); if (ok) good++; const el = $("#in" + i); el.classList.add(ok ? "ok" : "bad"); el.disabled = true; });
+    score = good / q.inputs.length;
+    yours = q.inputs.map((inp, i) => `${inp.label} ${vals[i]} ${inp.unit}`).join("; ");
+    correct = q.inputs.map(inp => `${inp.label} ${pl(inp.ans)} ${inp.unit}`).join("; ");
+  }
+  ST.got += score; ST.log.push({ q, score, yours, correct });
+  const cls = score === 1 ? "ok" : score > 0 ? "mid" : "bad";
+  const head = score === 1 ? pick(PRAISE) : score > 0 ? "Częściowo dobrze." : "Niestety nie.";
+  $("#fb").innerHTML = `<div class="fb ${cls}"><b>${head}</b>${score < 1 ? ` Poprawnie: <b>${correct}</b>` : ""}
+    <div style="margin-top:6px"><b>Rozwiązanie:</b><ol class="steps">${q.steps.filter(Boolean).map(s => `<li>${s}</li>`).join("")}</ol></div></div>`;
+  cur.done = true; $("#chk").textContent = ST.i + 1 < ST.qs.length ? "Dalej ▶" : "Zobacz wynik 🏁"; $("#chk").focus();
+}
+function hint(m) { $("#fb").innerHTML = `<div class="fb mid">${m}</div>`; }
+const GRADES = [[96, "celujący", "🏆"], [86, "bardzo dobry", "🌟"], [71, "dobry", "👍"], [51, "dostateczny", "🙂"], [31, "dopuszczający", "📚"], [0, "niedostateczny", "💪"]];
+function results() {
+  cur = null;
+  const n = ST.log.length, p = Math.round(ST.got / n * 100), g = GRADES.find(x => p >= x[0]);
+  const d = new Date(); const h = store.get("skala_hist", []);
+  h.unshift({ d: d.toLocaleDateString("pl-PL") + " " + d.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }), p, g: g[1], l: LEVELS[cfg.lv] }); store.set("skala_hist", h.slice(0, 8));
+  const wrong = ST.log.filter(l => l.score < 1);
+  $("#app").innerHTML = `
+  <div class="card" style="text-align:center"><h2>Koniec!</h2><div style="font-size:42px">${g[2]}</div><div class="big">${p}%</div>
+    <div style="font-size:20px;font-weight:800">Ocena: ${g[1]}</div><div class="small">${fmt(ST.got)} / ${n} pkt · poziom ${LEVELS[cfg.lv]}</div></div>
+  <div class="actions" style="justify-content:center">
+    ${wrong.length ? `<button class="btn" id="again" type="button" style="background:#a86e00">Podobne zadania jeszcze raz (${wrong.length})</button>` : ""}
+    <button class="btn" id="newq" type="button">Nowe zadania</button><button class="btn sec" id="menu" type="button">Ustawienia</button>
+  </div>
+  ${wrong.length ? `<div class="card"><h2>Do poprawki</h2>${wrong.map(l => `<div class="rev"><div>${l.q.q}</div><div class="y">Twoja odpowiedź: ${l.yours}</div><div class="c">Poprawnie: ${l.correct}</div></div>`).join("")}</div>` : `<div class="card" style="text-align:center">Wszystko bezbłędnie – gratulacje! 🎉</div>`}`;
+  // "podobne" = te same rodzaje zadań, ale z nowymi liczbami
+  if (wrong.length) $("#again").onclick = () => begin(wrong.map(l => regen(l.q)));
+  $("#newq").onclick = () => begin(build());
+  $("#menu").onclick = start;
+  window.scrollTo(0, 0);
+}
+// wygeneruj nowe zadanie tego samego rodzaju (inne liczby)
+function regen(q) {
+  for (let t = 0; t < 40; t++) { const g = q.gen; const nq = GEN[g](cfg.lv); if (nq.tag === q.tag && nq.q !== q.q) return nq; }
+  return GEN[q.gen](cfg.lv);
+}
+// zapamiętaj nazwę generatora w każdym zadaniu
+Object.keys(GEN).forEach(k => { const f = GEN[k]; GEN[k] = lv => Object.assign(f(lv), { gen: k }); });
+start();
+</script>
+</body>
+</html>

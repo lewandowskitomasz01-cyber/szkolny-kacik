@@ -5,3 +5,4 @@ Quizy i ćwiczenia do nauki w domu (klasa 5). Działa w przeglądarce i można g
 - `index.html` – lista materiałów
 - `grecja.html` – quiz: Starożytna Grecja
 - `przymiotniki.html` – angielski: stopniowanie przymiotników
+- `skala.html` – matematyka: skala i plan (generator zadań)
